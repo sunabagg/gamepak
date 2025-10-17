@@ -1,0 +1,51 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  #push:
+  #  branches: [ "main" ]
+  #pull_request:
+  #  branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: ['Build']
+        config:
+          - { name: '🍏 macOS', os: macos-latest }
+          - { name: '🐧 Linux', os: ubuntu-latest }
+          - { name: '🪟 Windows', os: windows-latest }
+
+    name: 🛠 Build / ${{ matrix.config.name }} (${{ matrix.build_type }})
+    runs-on: ${{ matrix.config.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      - uses: krdlab/setup-haxe@v1.5.1
+        with:
+          # Version Spec of the version to use. Example: 4.3.1
+          haxe-version: 4.3.6# default is 4.3.1
+      - run: |
+          haxe cli-native.hxml
+
+      - name: Upload artifact
+        if: matrix.build_type == 'Debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-Debug
+          path: |
+            ${{ github.workspace }}/bin/cpp/gamepak*

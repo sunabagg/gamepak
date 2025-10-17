@@ -1,0 +1,7 @@
+.haxelib/
+.haxelsp/recording/
+dump/
+bin/
+out/
+lfxbuild.jar
+.DS_Store

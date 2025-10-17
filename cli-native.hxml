@@ -1,0 +1,5 @@
+--class-path clisrc
+--main Main
+--library gamepak
+--cpp bin/cpp
+-D HAXE_OUTPUT_FILE=gamepak

@@ -1,0 +1,6 @@
+{
+    "name" : "gamepak",
+    "classPath": "libsrc",
+    "dependencies": {
+    }
+}
