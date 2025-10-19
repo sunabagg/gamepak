@@ -100,7 +100,7 @@ class Gamepak {
 
             Sys.println("Output path for binary: " + zipOutputPath);
 
-            var hxres = Sys.command("cd " + this.projDirPath + " && " + command);
+            var hxres = Sys.command(command);
             
             if (FileSystem.exists(projDirPath + "/build.hxml"))
                 FileSystem.deleteFile(projDirPath + "/build.hxml");
