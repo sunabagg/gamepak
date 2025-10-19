@@ -23,7 +23,7 @@ class Main {
         
         var snbprojpath = "";
         for (arg in args) {
-            if (StringTools.endsWith(arg, ".snbproj")) {
+            if (StringTools.endsWith(arg, ".nhproj")) {
                 snbprojpath = arg;
                 break;
             }
