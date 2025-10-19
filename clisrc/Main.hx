@@ -9,7 +9,7 @@ class Main {
 
         var args = Sys.args();
         if (args.length < 1 || args[0] == "-h" || args[0] == "--help") {
-            Sys.println("Usage: gamepak <project.snbproj>");
+            Sys.println("Usage: gamepak <project.nhproj>");
             return;
         }
 
@@ -30,7 +30,7 @@ class Main {
         }
 
         if (snbprojpath == "") {
-            Sys.println("Usage: gamepak <project.snbproj>");
+            Sys.println("Usage: gamepak <project.nhproj>");
             return;
         }
 
