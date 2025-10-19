@@ -552,7 +552,7 @@ class Gamepak {
     var useExternApi = false;
 
     private function generateHaxeBuildHxml(): String {
-        var command = "--class-path \"" + this.nhProjJson.scriptdir + "\"\n-main " + this.nhProjJson.entrypoint + "\n--library sunaba";
+        var command = "--class-path \"" + this.nhProjJson.scriptdir + "\"\n-main " + this.nhProjJson.entrypoint + "\n--library newhaven";
         if (useExternApi)
             command = "--class-path \"" + this.nhProjJson.scriptdir + "\"\n-main " + this.nhProjJson.entrypoint + "\n--library sunaba-extern";
         if (this.nhProjJson.apisymbols != false) {
