@@ -13,7 +13,7 @@ class Gamepak {
     public var snbprojPath: String;
     public var projDirPath: String = "";
 
-    public var nhProjJson: SunabaProject;
+    public var nhProjJson: NewhavenProject;
 
     public var zipOutputPath: String = "";
 
