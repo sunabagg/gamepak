@@ -529,7 +529,7 @@ class Gamepak {
 
         File.saveContent(hxmlPath, hxml);
 
-        var command = "" +this.haxePath + " '" + hxmlPath + "'";
+        var command = "" +this.haxePath + " \"" + hxmlPath + "\"";
 
         return command;
         /*var command = this.haxePath + " --class-path " + this.projDirPath + "/" + this.snbProjJson.scriptdir + " -main " + this.snbProjJson.entrypoint + " --library sunaba";
@@ -552,16 +552,16 @@ class Gamepak {
     var useExternApi = false;
 
     private function generateHaxeBuildHxml(): String {
-        var command = "--class-path '" + this.nhProjJson.scriptdir + "'\n-main " + this.nhProjJson.entrypoint + "\n--library sunaba";
+        var command = "--class-path \"" + this.nhProjJson.scriptdir + "\"\n-main " + this.nhProjJson.entrypoint + "\n--library sunaba";
         if (useExternApi)
-            command = "--class-path '" + this.nhProjJson.scriptdir + "'\n-main " + this.nhProjJson.entrypoint + "\n--library sunaba-extern";
+            command = "--class-path \"" + this.nhProjJson.scriptdir + "\"\n-main " + this.nhProjJson.entrypoint + "\n--library sunaba-extern";
         if (this.nhProjJson.apisymbols != false) {
             command += "\n--xml types.xml";
         }
         if (this.nhProjJson.sourcemap != false) {
             command += "\n-D source-map";
         }
-        command += "\n-lua '" + this.nhProjJson.luabin += "'\n-D lua-vanilla";
+        command += "\n-lua \"" + this.nhProjJson.luabin += "\"\n-D lua-vanilla";
 
         var librariesStr = "";
         for (lib in this.nhProjJson.libraries) {
