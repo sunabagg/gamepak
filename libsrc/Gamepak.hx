@@ -246,7 +246,7 @@ class Gamepak {
             if (this.markExecutable) {
                 // Mark the output file as executable
                 Sys.println("Marking output file as executable: " + zipOutputPath);
-                var shebang = "#!/usr/bin/env sunaba\n"; // or "#!/usr/bin/env sh\n"
+                /*var shebang = "#!/usr/bin/env sunaba\n"; // or "#!/usr/bin/env sh\n"
                 var zipBytes = File.getBytes(zipOutputPath);
                 var shebangBytes = Bytes.ofString(shebang);
         
@@ -265,7 +265,7 @@ class Gamepak {
                 }
                 else if (nhProjJson.type == "library") {
                     Sys.println("nlib file created successfully at: " + zipOutputPath);
-                }
+                }*/
             }
 
             
