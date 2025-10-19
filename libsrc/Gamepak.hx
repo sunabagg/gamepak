@@ -525,11 +525,11 @@ class Gamepak {
     private function generateHaxeBuildCommand(): String {
 
         var hxml = generateHaxeBuildHxml();
-        var hxmlPath = "'" + projDirPath + "/build.hxml'";
+        var hxmlPath = "" + projDirPath + "/build.hxml";
 
         File.saveContent(hxmlPath, hxml);
 
-        var command = "'" +this.haxePath + "' " + hxmlPath;
+        var command = "" +this.haxePath + " '" + hxmlPath + "'";
 
         return command;
         /*var command = this.haxePath + " --class-path " + this.projDirPath + "/" + this.snbProjJson.scriptdir + " -main " + this.snbProjJson.entrypoint + " --library sunaba";
