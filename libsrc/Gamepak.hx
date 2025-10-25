@@ -62,26 +62,26 @@ class Gamepak {
 
             if (nhProjJson.type == "executable") {
                 if (zipOutputPath == "") {
-                    zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".nhv";
+                    zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".snb";
                 }
                 else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
-                    Sys.println("Warning: Output path ends with .nlib, changing to .nhv");
-                    zipOutputPath = StringTools.replace(zipOutputPath, ".nlib", ".nhv");
+                    Sys.println("Warning: Output path ends with .nlib, changing to .snb");
+                    zipOutputPath = StringTools.replace(zipOutputPath, ".nlib", ".snb");
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".nhv")) {
+                else if (StringTools.endsWith(zipOutputPath, ".snb")) {
                     // Do nothing, already correct
                 }
                 else {
-                    zipOutputPath += ".nhv";
+                    zipOutputPath += ".snb";
                 }
             }
             else if (nhProjJson.type == "library") {
                 if (zipOutputPath == "") {
                     zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".nlib";
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".nhv")) {
-                    Sys.println("Warning: Output path ends with .nhv, changing to .nlib");
-                    zipOutputPath = StringTools.replace(zipOutputPath, ".nhv", ".nlib");
+                else if (StringTools.endsWith(zipOutputPath, ".snb")) {
+                    Sys.println("Warning: Output path ends with .snb, changing to .nlib");
+                    zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".nlib");
                 }
                 else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
                     // Do nothing, already correct
@@ -261,7 +261,7 @@ class Gamepak {
                 out.close();
 
                 if (nhProjJson.type == "executable") {
-                    Sys.println("nhv file created successfully at: " + zipOutputPath);
+                    Sys.println("snb file created successfully at: " + zipOutputPath);
                 }
                 else if (nhProjJson.type == "library") {
                     Sys.println("nlib file created successfully at: " + zipOutputPath);
@@ -327,19 +327,19 @@ class Gamepak {
         // -------------------------------
         if (nhProjJson.type == "executable") {
             if (zipOutputPath == "") {
-                zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".nhv";
+                zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".snb";
             } else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
-                Sys.println("Warning: Output path ends with .nlib, changing to .nhv");
-                zipOutputPath = StringTools.replace(zipOutputPath, ".nlib", ".nhv");
-            } else if (!StringTools.endsWith(zipOutputPath, ".nhv")) {
-                zipOutputPath += ".nhv";
+                Sys.println("Warning: Output path ends with .nlib, changing to .snb");
+                zipOutputPath = StringTools.replace(zipOutputPath, ".nlib", ".snb");
+            } else if (!StringTools.endsWith(zipOutputPath, ".snb")) {
+                zipOutputPath += ".snb";
             }
         } else if (nhProjJson.type == "library") {
             if (zipOutputPath == "") {
                 zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".nlib";
-            } else if (StringTools.endsWith(zipOutputPath, ".nhv")) {
-                Sys.println("Warning: Output path ends with .nhv, changing to .nlib");
-                zipOutputPath = StringTools.replace(zipOutputPath, ".nhv", ".nlib");
+            } else if (StringTools.endsWith(zipOutputPath, ".snb")) {
+                Sys.println("Warning: Output path ends with .snb, changing to .nlib");
+                zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".nlib");
             } else if (!StringTools.endsWith(zipOutputPath, ".nlib")) {
                 zipOutputPath += ".nlib";
             }
