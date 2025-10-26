@@ -13,7 +13,7 @@ class Gamepak {
     public var snbprojPath: String;
     public var projDirPath: String = "";
 
-    public var nhProjJson: NewhavenProject;
+    public var sprojJson: NewhavenProject;
 
     public var zipOutputPath: String = "";
 
@@ -45,24 +45,24 @@ class Gamepak {
         // Load the XML project file
         try {
             var json = sys.io.File.getContent(snbprojPath);
-            this.nhProjJson = haxe.Json.parse(json);
+            this.sprojJson = haxe.Json.parse(json);
             Sys.println("Successfully loaded project JSON.");
 
-            Sys.println("Project name: " + this.nhProjJson.name);
-            Sys.println("Project version: " + this.nhProjJson.version);
-            Sys.println("Project type: " + this.nhProjJson.type);
-            Sys.println("Script directory: " + this.nhProjJson.scriptdir);
-            Sys.println("Assets directory: " + this.nhProjJson.assetsdir);
-            Sys.println("API symbols enabled: " + this.nhProjJson.apisymbols);
-            Sys.println("Source map enabled: " + this.nhProjJson.sourcemap);
-            Sys.println("Entrypoint: " + this.nhProjJson.entrypoint);
-            Sys.println("Lua binary: " + this.nhProjJson.luabin);
-            Sys.println("Libraries: " + this.nhProjJson.libraries.join(", "));
-            Sys.println("Compiler flags: " + this.nhProjJson.compilerFlags.join(", "));
+            Sys.println("Project name: " + this.sprojJson.name);
+            Sys.println("Project version: " + this.sprojJson.version);
+            Sys.println("Project type: " + this.sprojJson.type);
+            Sys.println("Script directory: " + this.sprojJson.scriptdir);
+            Sys.println("Assets directory: " + this.sprojJson.assetsdir);
+            Sys.println("API symbols enabled: " + this.sprojJson.apisymbols);
+            Sys.println("Source map enabled: " + this.sprojJson.sourcemap);
+            Sys.println("Entrypoint: " + this.sprojJson.entrypoint);
+            Sys.println("Lua binary: " + this.sprojJson.luabin);
+            Sys.println("Libraries: " + this.sprojJson.libraries.join(", "));
+            Sys.println("Compiler flags: " + this.sprojJson.compilerFlags.join(", "));
 
-            if (nhProjJson.type == "executable") {
+            if (sprojJson.type == "executable") {
                 if (zipOutputPath == "") {
-                    zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".snb";
+                    zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
                 }
                 else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
                     Sys.println("Warning: Output path ends with .nlib, changing to .snb");
@@ -75,9 +75,9 @@ class Gamepak {
                     zipOutputPath += ".snb";
                 }
             }
-            else if (nhProjJson.type == "library") {
+            else if (sprojJson.type == "library") {
                 if (zipOutputPath == "") {
-                    zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".nlib";
+                    zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".nlib";
                 }
                 else if (StringTools.endsWith(zipOutputPath, ".snb")) {
                     Sys.println("Warning: Output path ends with .snb, changing to .nlib");
@@ -90,7 +90,7 @@ class Gamepak {
                     zipOutputPath += ".nlib";
                 }
             } else {
-                Sys.println("Unknown project type: " + this.nhProjJson.type);
+                Sys.println("Unknown project type: " + this.sprojJson.type);
                 Sys.exit(1);
                 return;
             }
@@ -113,7 +113,7 @@ class Gamepak {
 
             Sys.println("Haxe build command executed successfully.");
 
-            var mainLuaPath = this.projDirPath + "/" + this.nhProjJson.luabin;
+            var mainLuaPath = this.projDirPath + "/" + this.sprojJson.luabin;
             if (!FileSystem.exists(mainLuaPath)) {
                 Sys.println("Main Lua file does not exist: " + mainLuaPath);
                 Sys.exit(1);
@@ -134,7 +134,7 @@ class Gamepak {
             //Sys.println("Adding main Lua file to zip: " + this.snbProjJson.luabin);
             // Add main Lua file to the zip
             var entry:haxe.zip.Entry = {
-                fileName: this.nhProjJson.luabin,
+                fileName: this.sprojJson.luabin,
                 fileTime: Date.now(),
                 dataSize: mainLuaContent.length,
                 fileSize: mainLuaContent.length,
@@ -145,8 +145,8 @@ class Gamepak {
             entries.add(entry);
             FileSystem.deleteFile(mainLuaPath);
 
-            if (this.nhProjJson.sourcemap != false) {
-                var sourceMapName = this.nhProjJson.luabin + ".map";
+            if (this.sprojJson.sourcemap != false) {
+                var sourceMapName = this.sprojJson.luabin + ".map";
                 var sourceMapPath = this.projDirPath + "/" + sourceMapName;
                 if (FileSystem.exists(sourceMapPath)) {
                     //Sys.println("Adding source map file: " + sourceMapName);
@@ -166,7 +166,7 @@ class Gamepak {
                     Sys.println("Source map file does not exist, skipping: " + sourceMapName);
                 }
             }
-            if (this.nhProjJson.apisymbols != false) {
+            if (this.sprojJson.apisymbols != false) {
                 var typesXmlPath = this.projDirPath + "/types.xml";
                 if (FileSystem.exists(typesXmlPath)) {
                     //Sys.println("Adding types XML file: types.xml");
@@ -188,7 +188,7 @@ class Gamepak {
             }
 
 
-            var assetPath = this.projDirPath + "/" + this.nhProjJson.assetsdir;
+            var assetPath = this.projDirPath + "/" + this.sprojJson.assetsdir;
             if (FileSystem.exists(assetPath)) {
                 var assets = this.getAllFiles(assetPath);
 
@@ -217,11 +217,11 @@ class Gamepak {
             Sys.println("creating header for zip file");
 
             var header : HeaderFile = {
-                name: this.nhProjJson.name,
-                version: this.nhProjJson.version,
-                rootUrl: this.nhProjJson.rootUrl,
-                luabin: this.nhProjJson.luabin,
-                type: this.nhProjJson.type
+                name: this.sprojJson.name,
+                version: this.sprojJson.version,
+                rootUrl: this.sprojJson.rootUrl,
+                luabin: this.sprojJson.luabin,
+                type: this.sprojJson.type
             };
 
             var headerJson = haxe.Json.stringify(header);
@@ -260,10 +260,10 @@ class Gamepak {
                 out.write(outputBytes);
                 out.close();
 
-                if (nhProjJson.type == "executable") {
+                if (sprojJson.type == "executable") {
                     Sys.println("snb file created successfully at: " + zipOutputPath);
                 }
-                else if (nhProjJson.type == "library") {
+                else if (sprojJson.type == "library") {
                     Sys.println("nlib file created successfully at: " + zipOutputPath);
                 }*/
             }
@@ -310,11 +310,11 @@ class Gamepak {
         // ---------------------------
         try {
             var json = sys.io.File.getContent(snbprojPath);
-            this.nhProjJson = haxe.Json.parse(json);
+            this.sprojJson = haxe.Json.parse(json);
             Sys.println("Successfully loaded project JSON.");
-            Sys.println("Project name: " + this.nhProjJson.name);
-            Sys.println("Project version: " + this.nhProjJson.version);
-            Sys.println("Project type: " + this.nhProjJson.type);
+            Sys.println("Project name: " + this.sprojJson.name);
+            Sys.println("Project version: " + this.sprojJson.version);
+            Sys.println("Project type: " + this.sprojJson.type);
         } catch (e: Dynamic) {
             Sys.println("Error loading project JSON: " + e);
             throw "Error loading project JSON: " + e;
@@ -325,18 +325,18 @@ class Gamepak {
         // -------------------------------
         // Phase 3: Determine output path
         // -------------------------------
-        if (nhProjJson.type == "executable") {
+        if (sprojJson.type == "executable") {
             if (zipOutputPath == "") {
-                zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".snb";
+                zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
             } else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
                 Sys.println("Warning: Output path ends with .nlib, changing to .snb");
                 zipOutputPath = StringTools.replace(zipOutputPath, ".nlib", ".snb");
             } else if (!StringTools.endsWith(zipOutputPath, ".snb")) {
                 zipOutputPath += ".snb";
             }
-        } else if (nhProjJson.type == "library") {
+        } else if (sprojJson.type == "library") {
             if (zipOutputPath == "") {
-                zipOutputPath = this.projDirPath + "/bin/" + this.nhProjJson.name + ".nlib";
+                zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".nlib";
             } else if (StringTools.endsWith(zipOutputPath, ".snb")) {
                 Sys.println("Warning: Output path ends with .snb, changing to .nlib");
                 zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".nlib");
@@ -344,8 +344,8 @@ class Gamepak {
                 zipOutputPath += ".nlib";
             }
         } else {
-            Sys.println("Unknown project type: " + this.nhProjJson.type);
-            throw "Unknown project type: " + this.nhProjJson.type;
+            Sys.println("Unknown project type: " + this.sprojJson.type);
+            throw "Unknown project type: " + this.sprojJson.type;
             return;
         }
         Coroutine.yield();
@@ -372,7 +372,7 @@ class Gamepak {
         // ---------------------------------
         // Phase 5: Add main Lua file to zip
         // ---------------------------------
-        var mainLuaPath = this.projDirPath + "/" + this.nhProjJson.luabin;
+        var mainLuaPath = this.projDirPath + "/" + this.sprojJson.luabin;
         trace(mainLuaPath, FileSystem.exists(mainLuaPath));
         if (!FileSystem.exists(mainLuaPath)) {
             Sys.println("Main Lua file does not exist: " + mainLuaPath);
@@ -382,7 +382,7 @@ class Gamepak {
 
         var mainLuaContent = File.getContent(mainLuaPath);
         entries.add({
-            fileName: this.nhProjJson.luabin,
+            fileName: this.sprojJson.luabin,
             fileTime: Date.now(),
             dataSize: mainLuaContent.length,
             fileSize: mainLuaContent.length,
@@ -397,8 +397,8 @@ class Gamepak {
         // --------------------------------
         // Phase 6: Add optional source map
         // --------------------------------
-        if (this.nhProjJson.sourcemap != false) {
-            var sourceMapName = this.nhProjJson.luabin + ".map";
+        if (this.sprojJson.sourcemap != false) {
+            var sourceMapName = this.sprojJson.luabin + ".map";
             var sourceMapPath = this.projDirPath + "/" + sourceMapName;
             if (FileSystem.exists(sourceMapPath)) {
                 var sourceMapContent = File.getContent(sourceMapPath);
@@ -420,7 +420,7 @@ class Gamepak {
         // --------------------------------
         // Phase 7: Add API symbols if any
         // --------------------------------
-        if (this.nhProjJson.apisymbols != false) {
+        if (this.sprojJson.apisymbols != false) {
             var typesXmlPath = this.projDirPath + "/types.xml";
             if (FileSystem.exists(typesXmlPath)) {
                 var typesXmlContent = File.getContent(typesXmlPath);
@@ -442,7 +442,7 @@ class Gamepak {
         // ----------------------------
         // Phase 8: Add assets to zip
         // ----------------------------
-        var assetPath = this.projDirPath + "/" + this.nhProjJson.assetsdir;
+        var assetPath = this.projDirPath + "/" + this.sprojJson.assetsdir;
         if (FileSystem.exists(assetPath)) {
             var assets = this.getAllFilesCR(assetPath);
             Coroutine.yield();
@@ -468,11 +468,11 @@ class Gamepak {
         // Phase 9: Add header.json entry
         // ------------------------------
         var header : HeaderFile = {
-            name: this.nhProjJson.name,
-            version: this.nhProjJson.version,
-            rootUrl: this.nhProjJson.rootUrl,
-            luabin: this.nhProjJson.luabin,
-            type: this.nhProjJson.type
+            name: this.sprojJson.name,
+            version: this.sprojJson.version,
+            rootUrl: this.sprojJson.rootUrl,
+            luabin: this.sprojJson.luabin,
+            type: this.sprojJson.type
         };
         var headerJson = haxe.Json.stringify(header);
         var headerContent = haxe.io.Bytes.ofString(headerJson);
@@ -552,22 +552,22 @@ class Gamepak {
     var useExternApi = false;
 
     private function generateHaxeBuildHxml(): String {
-        var command = "--class-path \"" + this.nhProjJson.scriptdir + "\"\n-main " + this.nhProjJson.entrypoint + "\n--library libsunaba";
+        var command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library libsunaba";
         if (useExternApi)
-            command = "--class-path \"" + this.nhProjJson.scriptdir + "\"\n-main " + this.nhProjJson.entrypoint + "\n--library sunaba-extern";
-        if (this.nhProjJson.apisymbols != false) {
+            command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library sunaba-extern";
+        if (this.sprojJson.apisymbols != false) {
             command += "\n--xml types.xml";
         }
-        if (this.nhProjJson.sourcemap != false) {
+        if (this.sprojJson.sourcemap != false) {
             command += "\n-D source-map";
         }
-        command += "\n-lua \"" + this.nhProjJson.luabin += "\"\n-D lua-vanilla";
+        command += "\n-lua \"" + this.sprojJson.luabin += "\"\n-D lua-vanilla";
 
         var librariesStr = "";
-        for (lib in this.nhProjJson.libraries) {
+        for (lib in this.sprojJson.libraries) {
             librariesStr += "\n--library " + lib;
         }
-        command += "\n" + this.nhProjJson.compilerFlags.join("\n");
+        command += "\n" + this.sprojJson.compilerFlags.join("\n");
         return command;
     }
 
