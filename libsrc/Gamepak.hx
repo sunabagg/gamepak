@@ -539,7 +539,7 @@ class Gamepak {
         if (this.snbProjJson.sourcemap != false) {
             command += " -D source-map";
         }
-        command += " -lua " + this.projDirPath + "/" + this.snbProjJson.luabin += " -D lua-vanilla";
+        command += " -lua " + this.projDirPath + "/" + this.snbProjJson.luabin += " -D lua-ver 5.4";
 
         var librariesStr = "";
         for (lib in this.snbProjJson.libraries) {
