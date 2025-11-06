@@ -221,6 +221,7 @@ class Gamepak {
                 version: this.sprojJson.version,
                 rootUrl: this.sprojJson.rootUrl,
                 luabin: this.sprojJson.luabin,
+                runtime: "lua",
                 type: this.sprojJson.type
             };
 
