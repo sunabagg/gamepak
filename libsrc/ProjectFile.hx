@@ -1,6 +1,6 @@
 package;
 
-typedef NewhavenProject = {
+typedef ProjectFile = {
     var name: String;
     var version: String;
     var rootUrl: String;
