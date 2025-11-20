@@ -450,6 +450,7 @@ class Gamepak {
             for (assetKey in assets.keys()) {
                 trace(assetKey);
                 var assetContent = assets.get(assetKey);
+                Coroutine.yield();
                 entries.add({
                     fileName: StringTools.replace(assetKey, "assets/", ""),
                     fileSize: assetContent.length,
@@ -621,7 +622,9 @@ class Gamepak {
                 var subAssets = getAllFilesCR(filePath);
                 for (key in subAssets.keys()) {
                     assets.set(key, subAssets.get(key));
+                    Coroutine.yield();
                 }
+                Coroutine.yield();
             } else {
                 // Read file content
                 var content = File.getBytes(filePath);
@@ -631,6 +634,7 @@ class Gamepak {
                 }
                 //Sys.println("Adding file to assets: " + vfilePath);
                 assets.set(vfilePath, content);
+                Coroutine.yield();
             }
         }
 
