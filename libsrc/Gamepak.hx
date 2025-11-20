@@ -556,15 +556,13 @@ class Gamepak {
 
     private function generateHaxeBuildHxml(): String {
         var command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library libsunaba";
-        if (useExternApi)
-            command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library sunaba-extern";
         if (this.sprojJson.apisymbols != false) {
             command += "\n--xml types.xml";
         }
         if (this.sprojJson.sourcemap != false) {
             command += "\n-D source-map";
         }
-        command += "\n-lua \"" + this.sprojJson.luabin += "\"\n-D lua-vanilla";
+        command += "\n-lua \"" + this.sprojJson.luabin += "\"\n-D lua-ver 5.2";
 
         var librariesStr = "";
         for (lib in this.sprojJson.libraries) {
