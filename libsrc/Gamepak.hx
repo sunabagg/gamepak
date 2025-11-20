@@ -523,6 +523,41 @@ class Gamepak {
     });
 }
 
+    private function getAllFilesCR(dir:String): StringMap<Bytes> {
+        if (!FileSystem.exists(dir)) {
+            throw "Directory does not exist: " + dir;
+        }
+
+        var vdir = StringTools.replace(dir, this.projDirPath, "");
+
+        var assets = new StringMap<Bytes>();
+
+        for (f in FileSystem.readDirectory(dir)) {
+            var filePath = dir + "/" + f;
+            if (FileSystem.isDirectory(filePath)) {
+                // Recursively get files from subdirectory
+                var subAssets = getAllFilesCR(filePath);
+                for (key in subAssets.keys()) {
+                    assets.set(key, subAssets.get(key));
+                    Coroutine.yield();
+                }
+                Coroutine.yield();
+            } else {
+                // Read file content
+                var content = File.getBytes(filePath);
+                var vfilePath = StringTools.replace(filePath, this.projDirPath, "");
+                if (StringTools.startsWith(vfilePath, "/")) {
+                    vfilePath = vfilePath.substr(1);
+                }
+                //Sys.println("Adding file to assets: " + vfilePath);
+                assets.set(vfilePath, content);
+                Coroutine.yield();
+            }
+        }
+
+        return assets;
+    }
+
 #end
 
     private function generateHaxeBuildCommand(): String {
@@ -562,7 +597,7 @@ class Gamepak {
         if (this.sprojJson.sourcemap != false) {
             command += "\n-D source-map";
         }
-        command += "\n-lua \"" + this.sprojJson.luabin += "\"\n-D lua-ver 5.2";
+        command += "\n-lua \"" + this.sprojJson.luabin += "\"\n-D lua-vanilla";
 
         var librariesStr = "";
         for (lib in this.sprojJson.libraries) {
@@ -598,41 +633,6 @@ class Gamepak {
                 }
                 //Sys.println("Adding file to assets: " + vfilePath);
                 assets.set(vfilePath, content);
-            }
-        }
-
-        return assets;
-    }
-
-    private function getAllFilesCR(dir:String): StringMap<Bytes> {
-        if (!FileSystem.exists(dir)) {
-            throw "Directory does not exist: " + dir;
-        }
-
-        var vdir = StringTools.replace(dir, this.projDirPath, "");
-
-        var assets = new StringMap<Bytes>();
-
-        for (f in FileSystem.readDirectory(dir)) {
-            var filePath = dir + "/" + f;
-            if (FileSystem.isDirectory(filePath)) {
-                // Recursively get files from subdirectory
-                var subAssets = getAllFilesCR(filePath);
-                for (key in subAssets.keys()) {
-                    assets.set(key, subAssets.get(key));
-                    Coroutine.yield();
-                }
-                Coroutine.yield();
-            } else {
-                // Read file content
-                var content = File.getBytes(filePath);
-                var vfilePath = StringTools.replace(filePath, this.projDirPath, "");
-                if (StringTools.startsWith(vfilePath, "/")) {
-                    vfilePath = vfilePath.substr(1);
-                }
-                //Sys.println("Adding file to assets: " + vfilePath);
-                assets.set(vfilePath, content);
-                Coroutine.yield();
             }
         }
 
