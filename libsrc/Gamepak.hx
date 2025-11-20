@@ -624,13 +624,13 @@ class Gamepak {
                 }
             } else {
                 // Read file content
-                var content = File.getContent(filePath);
+                var content = File.getBytes(filePath);
                 var vfilePath = StringTools.replace(filePath, this.projDirPath, "");
                 if (StringTools.startsWith(vfilePath, "/")) {
                     vfilePath = vfilePath.substr(1);
                 }
                 //Sys.println("Adding file to assets: " + vfilePath);
-                assets.set(vfilePath, Bytes.ofString(content));
+                assets.set(vfilePath, content);
             }
         }
 
