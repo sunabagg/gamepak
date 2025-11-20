@@ -504,7 +504,7 @@ class Gamepak {
         // Phase 11: Mark as executable
         // ---------------------------------
         if (this.markExecutable) {
-            var shebang = "#!/usr/bin/env sunaba\n";
+            /*var shebang = "#!/usr/bin/env sunaba\n";
             var zipBytes = File.getBytes(zipOutputPath);
             var shebangBytes = Bytes.ofString(shebang);
             var outputBytes = Bytes.alloc(shebangBytes.length + zipBytes.length);
@@ -514,7 +514,7 @@ class Gamepak {
             var outExec = File.write(zipOutputPath, true);
             outExec.write(outputBytes);
             outExec.close();
-            Sys.println("Marked as executable: " + zipOutputPath);
+            Sys.println("Marked as executable: " + zipOutputPath);*/
         }
         Coroutine.yield();
 
