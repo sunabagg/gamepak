@@ -101,9 +101,6 @@ class Gamepak {
             Sys.println("Output path for binary: " + zipOutputPath);
 
             var hxres = Sys.command("cd \"" + this.projDirPath + "\" && " + command);
-            
-            if (FileSystem.exists(projDirPath + "/build.hxml"))
-                FileSystem.deleteFile(projDirPath + "/build.hxml");
 
             if (hxres != 0) {
                 Sys.println("Haxe build command failed with exit code: " + hxres);
@@ -358,9 +355,6 @@ class Gamepak {
         Sys.println("Generated Haxe build command: " + command);
 
         var hxres = Sys.command("cd " + this.projDirPath + " && " + command);
-
-        if (FileSystem.exists(projDirPath + "/build.hxml"))
-                FileSystem.deleteFile(projDirPath + "/build.hxml");
 
         if (hxres != 0) {
             Sys.println("Haxe build command failed with exit code: " + hxres);
