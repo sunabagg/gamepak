@@ -362,7 +362,7 @@ class Gamepak {
         }
         else {
             var shellscript = "#!/bin/sh\n";
-            shellscript += "cd " + this.projDirPath + "\n";
+            shellscript += "cd \"" + this.projDirPath + "\"\n";
             shellscript += command;
 
             var shpath = this.projDirPath + "/.studio/build-game-code.sh";
@@ -582,7 +582,13 @@ class Gamepak {
 
         File.saveContent(hxmlPath, hxml);
 
-        var command = "" +this.haxePath + " \"" + hxmlPath + "\"";
+        var haxePath: String = this.haxePath;
+
+        if (StringTools.contains(haxePath, " ")) {
+            haxePath = "\"" + this.haxePath + "\"";
+        }
+
+        var command = "" + haxePath + " \"" + hxmlPath + "\"";
 
         return command;
         /*var command = this.haxePath + " --class-path " + this.projDirPath + "/" + this.snbProjJson.scriptdir + " -main " + this.snbProjJson.entrypoint + " --library sunaba";
