@@ -23,6 +23,8 @@ class Gamepak {
 
     public function new() {}
 
+    public var chmodder: (String)->Void;
+
     public function build(snbprojPath: String): Void {
         Sys.println("Building project at: " + snbprojPath);
 
@@ -354,10 +356,26 @@ class Gamepak {
         var command = this.generateHaxeBuildCommand();
         Sys.println("Generated Haxe build command: " + command);
 
-        var commandarr = command.split(" ");
+        var hxres = -1;
+        if (Sys.systemName() == "Windows") {
+            hxres = Sys.command("cd " + this.projDirPath + " && " + command);
+        }
+        else {
+            var shellscript = "#!/bin/sh\n";
+            shellscript += "cd " + this.projDirPath + "\n";
+            shellscript += command;
 
-        Sys.setCwd(this.projDirPath);
-        var hxres = Sys.command(commandarr[0], [commandarr[1]]);
+            var shpath = this.projDirPath + "/.studio/build-game-code.sh";
+            if (StringTools.endsWith(this.projDirPath, "/")) {
+                shpath = this.projDirPath + ".studio/build-game-code.sh";
+            }
+
+            File.saveContent(shpath, shellscript);
+
+            chmodder(shpath);
+
+            hxres = Sys.command(shpath);
+        }
 
         if (hxres != 0) {
             Sys.println("Haxe build command failed with exit code: " + hxres);
