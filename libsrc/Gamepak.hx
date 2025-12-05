@@ -354,7 +354,10 @@ class Gamepak {
         var command = this.generateHaxeBuildCommand();
         Sys.println("Generated Haxe build command: " + command);
 
-        var hxres = Sys.command("cd " + this.projDirPath + " && " + command);
+        var commandarr = command.split(" ");
+
+        Sys.setCwd(this.projDirPath);
+        var hxres = Sys.command(commandarr[0], [commandarr[1]]);
 
         if (hxres != 0) {
             Sys.println("Haxe build command failed with exit code: " + hxres);
