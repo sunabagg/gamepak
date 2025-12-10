@@ -1,4 +1,5 @@
 package;
+import haxe.Json;
 import haxe.io.BytesBuffer;
 #if lua
 import lua.Coroutine;
@@ -7,6 +8,7 @@ import haxe.io.Bytes;
 import haxe.ds.StringMap;
 import sys.io.File;
 import sys.FileSystem;
+import org.msgpack.MsgPack;
 
 class Gamepak {
 
@@ -20,6 +22,12 @@ class Gamepak {
     public var haxePath: String = "haxe"; // Default path to Haxe compiler
 
     public var markExecutable: Bool = true; // Whether to mark the output as executable
+
+    public var resourceFormats = [
+        ".vscn",
+        ".vpfb",
+        ".vres"
+    ];
 
     public function new() {}
 
@@ -197,10 +205,20 @@ class Gamepak {
 
                 // Add all asset files to the zip
                 for (assetKey in assetKeys) {
+                    var newAssetPath = assetKey;
                     var assetContent = assets.get(assetKey);
-                    //Sys.println("Adding asset file: " + assetKey);
+                    for (resourceFormat in resourceFormats) {
+                        if (StringTools.endsWith(assetKey, resourceFormat)) {
+                            newAssetPath += ".dat";
+                            var assetStr = assetContent.toString();
+                            var assetData = Json.parse(assetStr);
+                            assetContent = MsgPack.encode(assetData);
+                            break;
+                        }
+                    }
+                    Sys.println("Adding asset file: " + assetKey);
                     var assetEntry:haxe.zip.Entry = {
-                        fileName: StringTools.replace(assetKey, "assets/", ""),
+                        fileName: StringTools.replace(newAssetPath, "assets/", ""),
                         fileSize: assetContent.length,
                         dataSize: assetContent.length,
                         fileTime: Date.now(),
@@ -278,6 +296,8 @@ class Gamepak {
     }
 
 #if lua
+    public var jsonToMsgpackConverter: (String) -> Bytes;
+
     public function buildCoroutine(snbprojPath: String): lua.Coroutine<()->Void> {
     return Coroutine.create(() -> {
 
@@ -466,8 +486,21 @@ class Gamepak {
                 trace(assetKey);
                 var assetContent = assets.get(assetKey);
                 Coroutine.yield();
+                var newAssetPath = assetKey;
+                Coroutine.yield();
+                for (resourceFormat in resourceFormats) {
+                    if (StringTools.endsWith(assetKey, resourceFormat)) {
+                        newAssetPath += ".dat";
+                        Coroutine.yield();
+                        var assetStr = assetContent.toString();
+                        Coroutine.yield();
+                        assetContent = jsonToMsgpackConverter(assetStr);
+                    }
+                    Coroutine.yield();
+                }
+                Coroutine.yield();
                 entries.add({
-                    fileName: StringTools.replace(assetKey, "assets/", ""),
+                    fileName: StringTools.replace(newAssetPath, "assets/", ""),
                     fileSize: assetContent.length,
                     dataSize: assetContent.length,
                     fileTime: Date.now(),
