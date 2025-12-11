@@ -8,8 +8,10 @@ import haxe.io.Bytes;
 import haxe.ds.StringMap;
 import sys.io.File;
 import sys.FileSystem;
+#if lua
+#else
 import org.msgpack.MsgPack;
-
+#end
 class Gamepak {
 
     public var snbprojPath: String;
@@ -212,7 +214,10 @@ class Gamepak {
                             newAssetPath += ".dat";
                             var assetStr = assetContent.toString();
                             var assetData = Json.parse(assetStr);
+#if lua
+#else
                             assetContent = MsgPack.encode(assetData);
+#end
                             break;
                         }
                     }
