@@ -1,0 +1,5 @@
+--class-path clisrc
+--main Main
+--library gamepak
+--hl bin/vs2017/gamepak.c
+-D hlgen.makefile=vs2017

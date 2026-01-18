@@ -1,0 +1,4 @@
+--class-path clisrc
+--main Main
+--library gamepak
+--hl bin/c/gamepak.c
