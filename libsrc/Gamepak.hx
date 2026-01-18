@@ -76,9 +76,9 @@ class Gamepak {
                 if (zipOutputPath == "") {
                     zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
-                    Sys.println("Warning: Output path ends with .nlib, changing to .snb");
-                    zipOutputPath = StringTools.replace(zipOutputPath, ".nlib", ".snb");
+                else if (StringTools.endsWith(zipOutputPath, ".slib")) {
+                    Sys.println("Warning: Output path ends with .slib, changing to .snb");
+                    zipOutputPath = StringTools.replace(zipOutputPath, ".slib", ".snb");
                 }
                 else if (StringTools.endsWith(zipOutputPath, ".snb")) {
                     // Do nothing, already correct
@@ -89,17 +89,17 @@ class Gamepak {
             }
             else if (sprojJson.type == "library") {
                 if (zipOutputPath == "") {
-                    zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".nlib";
+                    zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".slib";
                 }
                 else if (StringTools.endsWith(zipOutputPath, ".snb")) {
-                    Sys.println("Warning: Output path ends with .snb, changing to .nlib");
-                    zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".nlib");
+                    Sys.println("Warning: Output path ends with .snb, changing to .slib");
+                    zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".slib");
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
+                else if (StringTools.endsWith(zipOutputPath, ".slib")) {
                     // Do nothing, already correct
                 }
                 else {
-                    zipOutputPath += ".nlib";
+                    zipOutputPath += ".slib";
                 }
             } else {
                 Sys.println("Unknown project type: " + this.sprojJson.type);
@@ -287,7 +287,7 @@ class Gamepak {
                     Sys.println("snb file created successfully at: " + zipOutputPath);
                 }
                 else if (sprojJson.type == "library") {
-                    Sys.println("nlib file created successfully at: " + zipOutputPath);
+                    Sys.println("slib file created successfully at: " + zipOutputPath);
                 }*/
             }
 
@@ -353,20 +353,20 @@ class Gamepak {
         if (sprojJson.type == "executable") {
             if (zipOutputPath == "") {
                 zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
-            } else if (StringTools.endsWith(zipOutputPath, ".nlib")) {
-                Sys.println("Warning: Output path ends with .nlib, changing to .snb");
-                zipOutputPath = StringTools.replace(zipOutputPath, ".nlib", ".snb");
+            } else if (StringTools.endsWith(zipOutputPath, ".slib")) {
+                Sys.println("Warning: Output path ends with .slib, changing to .snb");
+                zipOutputPath = StringTools.replace(zipOutputPath, ".slib", ".snb");
             } else if (!StringTools.endsWith(zipOutputPath, ".snb")) {
                 zipOutputPath += ".snb";
             }
         } else if (sprojJson.type == "library") {
             if (zipOutputPath == "") {
-                zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".nlib";
+                zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".slib";
             } else if (StringTools.endsWith(zipOutputPath, ".snb")) {
-                Sys.println("Warning: Output path ends with .snb, changing to .nlib");
-                zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".nlib");
-            } else if (!StringTools.endsWith(zipOutputPath, ".nlib")) {
-                zipOutputPath += ".nlib";
+                Sys.println("Warning: Output path ends with .snb, changing to .slib");
+                zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".slib");
+            } else if (!StringTools.endsWith(zipOutputPath, ".slib")) {
+                zipOutputPath += ".slib";
             }
         } else {
             Sys.println("Unknown project type: " + this.sprojJson.type);
