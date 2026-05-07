@@ -536,6 +536,10 @@ class Gamepak {
         Sys.println("Haxe build command executed successfully.");
         yield();
 
+        var rootFolders: Array<VFolder> = [];
+        var rootFiles: Array<VFile> = [];
+        var folderMap = new StringMap<VFolder>();
+
         // ---------------------------------
         // Phase 5: Add main Lua file to zip
         // ---------------------------------
@@ -549,6 +553,10 @@ class Gamepak {
 
         var mainLuaContent = File.getBytes(mainLuaPath);
         addToZipFile(this.sprojJson.luabin, mainLuaContent);
+        rootFiles.push({
+            name: this.sprojJson.luabin,
+            path: this.sprojJson.luabin
+        });
         FileSystem.deleteFile(mainLuaPath);
         Sys.println("Added File: main.lua");
         yield();
@@ -564,6 +572,10 @@ class Gamepak {
                 addToZipFile(sourceMapName, sourceMapContent);
                 FileSystem.deleteFile(sourceMapPath);
             }
+            rootFiles.push({
+                name: sourceMapName,
+                path: sourceMapName
+            });
             Sys.println("Added File: " + sourceMapName);
         }
         yield();
@@ -578,6 +590,10 @@ class Gamepak {
                 addToZipFile("types.xml", typesXmlContent);
                 FileSystem.deleteFile(typesXmlPath);
             }
+            rootFiles.push({
+                name: "types.xml",
+                path: "types.xml"            
+            });
             Sys.println("Added File: types.xml");
         }
         yield();
@@ -593,7 +609,71 @@ class Gamepak {
                 trace(assetKey);
                 var assetContent = assets.get(assetKey);
                 yield();
-                var newAssetPath = assetKey;
+                var newAssetPath = StringTools.replace(assetKey, "assets/", "");
+                var newAssetPathArr = newAssetPath.split("/");
+                if (newAssetPathArr.length > 1) {
+                    var folderPath = newAssetPathArr.slice(0, newAssetPathArr.length - 1).join("/");
+                    if (!folderMap.exists(folderPath)) {
+                        var vfolder: VFolder = {
+                            name: newAssetPathArr[newAssetPathArr.length - 2],
+                            path: folderPath,
+                            folders: [],
+                            files: []
+                        };
+                        folderMap.set(folderPath, vfolder);
+                        var folderPathArr = folderPath.split("/");
+                        if (folderPathArr.slice(0, folderPathArr.length - 1).join("/") != "") {
+                            var parentFolderPath = folderPath.split("/").slice(0, -1).join("/");
+                            var isParnetOfFolder = true;
+                            while (parentFolderPath != "") {
+                                if (folderMap.exists(parentFolderPath)) {
+                                    var parentFolder = folderMap.get(parentFolderPath);
+                                    if (!parentFolder.folders.contains(vfolder)) {
+                                        parentFolder.folders.push(vfolder);
+                                    }
+                                    break;
+                                } else {
+                                    var parentVFolder: VFolder = {
+                                        name: parentFolderPath.split("/").slice(-1)[0],
+                                        path: parentFolderPath,
+                                        folders: [],
+                                        files: []
+                                    };
+                                    if (isParnetOfFolder) {
+                                        parentVFolder.folders.push(vfolder);
+                                        isParnetOfFolder = false;
+                                    }
+                                    folderMap.set(parentFolderPath, parentVFolder);
+                                    if (StringTools.contains(parentFolderPath, "/")) {
+                                        parentFolderPath = parentFolderPath.split("/").slice(0, -1).join("/");
+                                    } else {
+                                        parentFolderPath = "";
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            rootFolders.push(vfolder);
+                        }
+                        vfolder.files.push({
+                            name: newAssetPathArr[newAssetPathArr.length - 1],
+                            path: newAssetPath
+                        });
+                    }
+                    else {
+                        var existingFolder = folderMap.get(folderPath);
+                        existingFolder.files.push({
+                            name: newAssetPathArr[newAssetPathArr.length - 1],
+                            path: newAssetPath
+                        });
+                    }
+                }
+                else {
+                    rootFiles.push({
+                        name: newAssetPath,
+                        path: newAssetPath
+                    });
+                }
                 yield();
                 for (resourceFormat in resourceFormats) {
                     if (StringTools.endsWith(assetKey, resourceFormat)) {
@@ -606,8 +686,8 @@ class Gamepak {
                     yield();
                 }
                 yield();
-                addToZipFile(StringTools.replace(newAssetPath, "assets/", ""), assetContent);
-                Sys.println("Added File: " + StringTools.replace(assetKey, "assets/", ""));
+                addToZipFile(newAssetPath, assetContent);
+                Sys.println("Added File: " + newAssetPath);
                 yield();
             }
         }
@@ -627,8 +707,20 @@ class Gamepak {
         var headerJson = haxe.Json.stringify(header);
         var headerContent = haxe.io.Bytes.ofString(headerJson);
         addToZipFile("header.json", headerContent);
+        rootFiles.push({
+            name: "header.json",
+            path: "header.json"
+        });
         Sys.println("Added File: header.json");
         yield();
+
+        var vFileSystem: VFileSystem = {
+            folders: rootFolders,
+            files: rootFiles
+        };
+
+        var vfsjson = haxe.Json.stringify(vFileSystem);
+        addToZipFile("filesystem.json", haxe.io.Bytes.ofString(vfsjson));
 
         // ---------------------------------
         // Phase 10: Write zip file to disk
