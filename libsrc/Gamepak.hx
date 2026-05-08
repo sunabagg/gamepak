@@ -229,60 +229,16 @@ class Gamepak {
                     var newAssetPathArr = newAssetPath.split("/");
                     if (newAssetPathArr.length > 1) {
                         var folderPath = newAssetPathArr.slice(0, newAssetPathArr.length - 1).join("/");
+                        var vfolder: VFolder;
                         if (!folderMap.exists(folderPath)) {
-                            var vfolder: VFolder = {
-                                name: newAssetPathArr[newAssetPathArr.length - 2],
-                                path: folderPath,
-                                folders: [],
-                                files: []
-                            };
-                            folderMap.set(folderPath, vfolder);
-                            var folderPathArr = folderPath.split("/");
-                            if (folderPathArr.slice(0, folderPathArr.length - 1).join("/") != "") {
-                                var parentFolderPath = folderPath.split("/").slice(0, -1).join("/");
-                                var isParnetOfFolder = true;
-                                while (parentFolderPath != "") {
-                                    if (folderMap.exists(parentFolderPath)) {
-                                        var parentFolder = folderMap.get(parentFolderPath);
-                                        if (!parentFolder.folders.contains(vfolder)) {
-                                            parentFolder.folders.push(vfolder);
-                                        }
-                                        break;
-                                    } else {
-                                        var parentVFolder: VFolder = {
-                                            name: parentFolderPath.split("/").slice(-1)[0],
-                                            path: parentFolderPath,
-                                            folders: [],
-                                            files: []
-                                        };
-                                        if (isParnetOfFolder) {
-                                            parentVFolder.folders.push(vfolder);
-                                            isParnetOfFolder = false;
-                                        }
-                                        folderMap.set(parentFolderPath, parentVFolder);
-                                        if (StringTools.contains(parentFolderPath, "/")) {
-                                            parentFolderPath = parentFolderPath.split("/").slice(0, -1).join("/");
-                                        } else {
-                                            parentFolderPath = "";
-                                        }
-                                    }
-                                }
-                            }
-                            else {
-                                rootFolders.push(vfolder);
-                            }
-                            vfolder.files.push({
-                                name: newAssetPathArr[newAssetPathArr.length - 1],
-                                path: newAssetPath
-                            });
+                            vfolder = this.ensureVFolder(folderMap, rootFolders, folderPath);
+                        } else {
+                            vfolder = folderMap.get(folderPath);
                         }
-                        else {
-                            var existingFolder = folderMap.get(folderPath);
-                            existingFolder.files.push({
-                                name: newAssetPathArr[newAssetPathArr.length - 1],
-                                path: newAssetPath
-                            });
-                        }
+                        vfolder.files.push({
+                            name: newAssetPathArr[newAssetPathArr.length - 1],
+                            path: newAssetPath
+                        });
                     }
                     else {
                         rootFiles.push({
@@ -402,14 +358,43 @@ class Gamepak {
         }
     }
 
-#if lua
+    private function ensureVFolder(folderMap:StringMap<VFolder>, rootFolders:Array<VFolder>, folderPath:String): VFolder {
+        var segments = folderPath.split("/");
+        var parent:VFolder = null;
+        var currentPath = "";
+        for (segment in segments) {
+            currentPath = if (currentPath == "") segment else currentPath + "/" + segment;
+            var folder:VFolder;
+            if (folderMap.exists(currentPath)) {
+                folder = folderMap.get(currentPath);
+            } else {
+                folder = {
+                    name: segment,
+                    path: currentPath,
+                    folders: [],
+                    files: []
+                };
+                folderMap.set(currentPath, folder);
+                if (parent == null) {
+                    rootFolders.push(folder);
+                } else if (!parent.folders.contains(folder)) {
+                    parent.folders.push(folder);
+                }
+            }
+            parent = folder;
+        }
+        return parent;
+    }
+
     public var jsonToMsgpackConverter: (String) -> Bytes;
 
     public var cnt: Int = 0;
 
     public function yield() {
         cnt++;
+    #if lua
         Coroutine.yield();
+    #end
     }
 
     public var addToZipFile: (String, Bytes)->Void = null;
@@ -418,6 +403,7 @@ class Gamepak {
 
     public var skipAssets: Bool = false;
 
+#if lua
     public function buildCoroutine(snbprojPath: String): lua.Coroutine<()->Void> {
         if (createZip == null) {
             throw "1";
@@ -429,6 +415,18 @@ class Gamepak {
             throw "3";
         }
     return Coroutine.create(() -> {
+#else
+    public function buildCoroutine(snbprojPath: String): Void {
+        if (createZip == null) {
+            throw "1";
+        }
+        if (addToZipFile == null) {
+            throw "2";
+        }
+        if (buildZip == null) {
+            throw "3";
+        }
+#end
 
         // ---------------------------------
         // Phase 1: Initial setup and paths
@@ -613,60 +611,16 @@ class Gamepak {
                 var newAssetPathArr = newAssetPath.split("/");
                 if (newAssetPathArr.length > 1) {
                     var folderPath = newAssetPathArr.slice(0, newAssetPathArr.length - 1).join("/");
+                    var vfolder: VFolder;
                     if (!folderMap.exists(folderPath)) {
-                        var vfolder: VFolder = {
-                            name: newAssetPathArr[newAssetPathArr.length - 2],
-                            path: folderPath,
-                            folders: [],
-                            files: []
-                        };
-                        folderMap.set(folderPath, vfolder);
-                        var folderPathArr = folderPath.split("/");
-                        if (folderPathArr.slice(0, folderPathArr.length - 1).join("/") != "") {
-                            var parentFolderPath = folderPath.split("/").slice(0, -1).join("/");
-                            var isParnetOfFolder = true;
-                            while (parentFolderPath != "") {
-                                if (folderMap.exists(parentFolderPath)) {
-                                    var parentFolder = folderMap.get(parentFolderPath);
-                                    if (!parentFolder.folders.contains(vfolder)) {
-                                        parentFolder.folders.push(vfolder);
-                                    }
-                                    break;
-                                } else {
-                                    var parentVFolder: VFolder = {
-                                        name: parentFolderPath.split("/").slice(-1)[0],
-                                        path: parentFolderPath,
-                                        folders: [],
-                                        files: []
-                                    };
-                                    if (isParnetOfFolder) {
-                                        parentVFolder.folders.push(vfolder);
-                                        isParnetOfFolder = false;
-                                    }
-                                    folderMap.set(parentFolderPath, parentVFolder);
-                                    if (StringTools.contains(parentFolderPath, "/")) {
-                                        parentFolderPath = parentFolderPath.split("/").slice(0, -1).join("/");
-                                    } else {
-                                        parentFolderPath = "";
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            rootFolders.push(vfolder);
-                        }
-                        vfolder.files.push({
-                            name: newAssetPathArr[newAssetPathArr.length - 1],
-                            path: newAssetPath
-                        });
+                        vfolder = this.ensureVFolder(folderMap, rootFolders, folderPath);
+                    } else {
+                        vfolder = folderMap.get(folderPath);
                     }
-                    else {
-                        var existingFolder = folderMap.get(folderPath);
-                        existingFolder.files.push({
-                            name: newAssetPathArr[newAssetPathArr.length - 1],
-                            path: newAssetPath
-                        });
-                    }
+                    vfolder.files.push({
+                        name: newAssetPathArr[newAssetPathArr.length - 1],
+                        path: newAssetPath
+                    });
                 }
                 else {
                     rootFiles.push({
@@ -748,7 +702,10 @@ class Gamepak {
         yield();
 
         Sys.println("Build complete: " + zipOutputPath);
+#if lua
     });
+#else
+#end
 }
 
     private function getAllFilesCR(dir:String): StringMap<Bytes> {
@@ -901,8 +858,6 @@ class Gamepak {
 
         return count;
     }
-
-#end
 
     private function generateHaxeBuildCommand(): String {
 
