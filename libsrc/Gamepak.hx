@@ -895,9 +895,9 @@ class Gamepak {
     var useExternApi = false;
 
     private function generateHaxeBuildHxml(): String {
-        var command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library libsunaba";
+        var command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library sunaba";
         if (sprojJson.type == "plugin") {
-            command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.pluginEntrypoint + "\n--library libsunaba\n--library sunaba-studio\n--library gamepak";
+            command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.pluginEntrypoint + "\n--library sunaba\n--library sunaba-studio\n--library gamepak";
         }
         if (this.sprojJson.apisymbols != false) {
             command += "\n--xml types.xml";
