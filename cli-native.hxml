@@ -2,4 +2,4 @@
 --main Main
 --library gamepak
 --cpp bin/cpp
--D HAXE_OUTPUT_FILE=gamepak
+-D HAXE_OUTPUT_FILE=gamepakjs
