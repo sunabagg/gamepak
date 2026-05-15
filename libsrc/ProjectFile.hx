@@ -11,7 +11,7 @@ typedef ProjectFile = {
     var sourcemap: Bool;
     var entrypoint: String;
     var pluginEntrypoint: String;
-    var luabin: String;
+    var mainscript: String;
     var libraries: Array<String>;
     var compilerFlags: Array<String>;
 }

@@ -23,7 +23,7 @@ class Main {
         
         var snbprojpath = "";
         for (arg in args) {
-            if (StringTools.endsWith(arg, ".sproj")) {
+            if (StringTools.endsWith(arg, ".sproj") || StringTools.endsWith(arg, ".jsproj") || StringTools.endsWith(arg, ".snbproj")) {
                 snbprojpath = arg;
                 break;
             }
