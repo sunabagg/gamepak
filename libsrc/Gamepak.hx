@@ -29,6 +29,10 @@ class Gamepak {
         ".vscn",
         ".vpfb",
         ".vres",
+        ".vchr",
+        ".vclt",
+        ".vhw",
+        ".vdrs",
         ".smdl",
         ".ftd",
     ];
