@@ -5,6 +5,7 @@ typedef ProjectFile = {
     var version: String;
     var rootUrl: String;
     var type: String;
+    var language: String;
     var scriptdir: String;
     var assetsdir: String;
     var apisymbols: Bool;

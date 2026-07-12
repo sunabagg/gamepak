@@ -64,6 +64,8 @@ class Gamepak {
         try {
             var json = sys.io.File.getContent(snbprojPath);
             this.sprojJson = haxe.Json.parse(json);
+            if (this.sprojJson.language == null || this.sprojJson.language == "")
+                this.sprojJson.language = "haxe";
             Sys.println("Successfully loaded project JSON.");
 
             Sys.println("Project name: " + this.sprojJson.name);
@@ -113,30 +115,35 @@ class Gamepak {
                 return;
             }
 
-            var command = this.generateHaxeBuildCommand();
-            Sys.println("Generated Haxe build command: " + command);
+            var mainLuaPath: String = "";
+            var mainLuaContent: Bytes = null;
 
-            Sys.println("Output path for binary: " + zipOutputPath);
+            if (this.sprojJson.language == "haxe") {
+                var command = this.generateHaxeBuildCommand();
+                Sys.println("Generated Haxe build command: " + command);
 
-            var hxres = Sys.command("cd \"" + this.projDirPath + "\" && " + command);
+                Sys.println("Output path for binary: " + zipOutputPath);
 
-            if (hxres != 0) {
-                Sys.println("Haxe build command failed with exit code: " + hxres);
-                Sys.exit(hxres);
-                return;
+                var hxres = Sys.command("cd \"" + this.projDirPath + "\" && " + command);
+
+                if (hxres != 0) {
+                    Sys.println("Haxe build command failed with exit code: " + hxres);
+                    Sys.exit(hxres);
+                    return;
+                }
+
+                Sys.println("Haxe build command executed successfully.");
+
+                mainLuaPath = this.projDirPath + "/" + this.sprojJson.luabin;
+                if (!FileSystem.exists(mainLuaPath)) {
+                    Sys.println("Main Lua file does not exist: " + mainLuaPath);
+                    Sys.exit(1);
+                    return;
+                }
+
+                //Sys.println("Reading main Lua file: " + mainLuaPath);
+                mainLuaContent = File.getBytes(mainLuaPath);
             }
-
-            Sys.println("Haxe build command executed successfully.");
-
-            var mainLuaPath = this.projDirPath + "/" + this.sprojJson.luabin;
-            if (!FileSystem.exists(mainLuaPath)) {
-                Sys.println("Main Lua file does not exist: " + mainLuaPath);
-                Sys.exit(1);
-                return;
-            }
-
-            //Sys.println("Reading main Lua file: " + mainLuaPath);
-            var mainLuaContent = File.getBytes(mainLuaPath);
 
             // Create the zip file using haxe.zip.Writer
             //Sys.println("Creating zip file at: " + zipOutputPath);
@@ -150,71 +157,73 @@ class Gamepak {
             // Collect all zip entries in a list
             var entries = new haxe.ds.List<haxe.zip.Entry>();
 
-            //Sys.println("Adding main Lua file to zip: " + this.snbProjJson.luabin);
-            // Add main Lua file to the zip
-            var entry:haxe.zip.Entry = {
-                fileName: this.sprojJson.luabin,
-                fileTime: Date.now(),
-                dataSize: mainLuaContent.length,
-                fileSize: mainLuaContent.length,
-                data: mainLuaContent,
-                crc32: haxe.crypto.Crc32.make(mainLuaContent),
-                compressed: false
-            };
-            entries.add(entry);
-            rootFiles.push({
-                name: this.sprojJson.luabin,
-                path: this.sprojJson.luabin
-            });
-            FileSystem.deleteFile(mainLuaPath);
+            if (this.sprojJson.language == "haxe") {
+                //Sys.println("Adding main Lua file to zip: " + this.snbProjJson.luabin);
+                // Add main Lua file to the zip
+                var entry:haxe.zip.Entry = {
+                    fileName: this.sprojJson.luabin,
+                    fileTime: Date.now(),
+                    dataSize: mainLuaContent.length,
+                    fileSize: mainLuaContent.length,
+                    data: mainLuaContent,
+                    crc32: haxe.crypto.Crc32.make(mainLuaContent),
+                    compressed: false
+                };
+                entries.add(entry);
+                rootFiles.push({
+                    name: this.sprojJson.luabin,
+                    path: this.sprojJson.luabin
+                });
+                FileSystem.deleteFile(mainLuaPath);
 
-            if (this.sprojJson.sourcemap != false) {
-                var sourceMapName = this.sprojJson.luabin + ".map";
-                var sourceMapPath = this.projDirPath + "/" + sourceMapName;
-                if (FileSystem.exists(sourceMapPath)) {
-                    //Sys.println("Adding source map file: " + sourceMapName);
-                    var sourceMapContent = File.getBytes(sourceMapPath);
-                    var sourceMapEntry:haxe.zip.Entry = {
-                        fileName: sourceMapName,
-                        fileSize: sourceMapContent.length,
-                        dataSize: sourceMapContent.length,
-                        fileTime: Date.now(),
-                        data: sourceMapContent,
-                        crc32: haxe.crypto.Crc32.make(sourceMapContent),
-                        compressed: false
-                    };
-                    entries.add(sourceMapEntry);
-                    rootFiles.push({
-                        name: sourceMapName,
-                        path: sourceMapName
-                    });
-                    FileSystem.deleteFile(sourceMapPath);
-                } else {
-                    Sys.println("Source map file does not exist, skipping: " + sourceMapName);
+                if (this.sprojJson.sourcemap != false) {
+                    var sourceMapName = this.sprojJson.luabin + ".map";
+                    var sourceMapPath = this.projDirPath + "/" + sourceMapName;
+                    if (FileSystem.exists(sourceMapPath)) {
+                        //Sys.println("Adding source map file: " + sourceMapName);
+                        var sourceMapContent = File.getBytes(sourceMapPath);
+                        var sourceMapEntry:haxe.zip.Entry = {
+                            fileName: sourceMapName,
+                            fileSize: sourceMapContent.length,
+                            dataSize: sourceMapContent.length,
+                            fileTime: Date.now(),
+                            data: sourceMapContent,
+                            crc32: haxe.crypto.Crc32.make(sourceMapContent),
+                            compressed: false
+                        };
+                        entries.add(sourceMapEntry);
+                        rootFiles.push({
+                            name: sourceMapName,
+                            path: sourceMapName
+                        });
+                        FileSystem.deleteFile(sourceMapPath);
+                    } else {
+                        Sys.println("Source map file does not exist, skipping: " + sourceMapName);
+                    }
                 }
-            }
-            if (this.sprojJson.apisymbols != false) {
-                var typesXmlPath = this.projDirPath + "/types.xml";
-                if (FileSystem.exists(typesXmlPath)) {
-                    //Sys.println("Adding types XML file: types.xml");
-                    var typesXmlContent = File.getBytes(typesXmlPath);
-                    var typesXmlEntry:haxe.zip.Entry = {
-                        fileName: "types.xml",
-                        fileSize: typesXmlContent.length,
-                        dataSize: typesXmlContent.length,
-                        fileTime: Date.now(),
-                        data: typesXmlContent,
-                        crc32: haxe.crypto.Crc32.make(typesXmlContent),
-                        compressed: false
-                    };
-                    entries.add(typesXmlEntry);
-                    rootFiles.push({
-                        name: "types.xml",
-                        path: "types.xml"
-                    });
-                    FileSystem.deleteFile(typesXmlPath);
-                } else {
-                    Sys.println("Types XML file does not exist, skipping.");
+                if (this.sprojJson.apisymbols != false) {
+                    var typesXmlPath = this.projDirPath + "/types.xml";
+                    if (FileSystem.exists(typesXmlPath)) {
+                        //Sys.println("Adding types XML file: types.xml");
+                        var typesXmlContent = File.getBytes(typesXmlPath);
+                        var typesXmlEntry:haxe.zip.Entry = {
+                            fileName: "types.xml",
+                            fileSize: typesXmlContent.length,
+                            dataSize: typesXmlContent.length,
+                            fileTime: Date.now(),
+                            data: typesXmlContent,
+                            crc32: haxe.crypto.Crc32.make(typesXmlContent),
+                            compressed: false
+                        };
+                        entries.add(typesXmlEntry);
+                        rootFiles.push({
+                            name: "types.xml",
+                            path: "types.xml"
+                        });
+                        FileSystem.deleteFile(typesXmlPath);
+                    } else {
+                        Sys.println("Types XML file does not exist, skipping.");
+                    }
                 }
             }
 
@@ -280,12 +289,17 @@ class Gamepak {
 
             Sys.println("creating header for zip file");
 
+            var runtime = this.sprojJson.language;
+            if (runtime == "lua") {
+                runtime = "sunaba-lua";
+            }
+
             var header : HeaderFile = {
                 name: this.sprojJson.name,
                 version: this.sprojJson.version,
                 rootUrl: this.sprojJson.rootUrl,
                 luabin: this.sprojJson.luabin,
-                runtime: "lua",
+                runtime: runtime,
                 type: this.sprojJson.type
             };
             rootFiles.push({
@@ -461,6 +475,8 @@ class Gamepak {
         try {
             var json = sys.io.File.getContent(snbprojPath);
             this.sprojJson = haxe.Json.parse(json);
+            if (this.sprojJson.language == null || this.sprojJson.language == "")
+                this.sprojJson.language = "haxe";
             Sys.println("Successfully loaded project JSON.");
             Sys.println("Project name: " + this.sprojJson.name);
             Sys.println("Project version: " + this.sprojJson.version);
@@ -505,38 +521,41 @@ class Gamepak {
         // -----------------------------
         // Phase 4: Haxe build command
         // -----------------------------
-        var command = this.generateHaxeBuildCommand();
-        Sys.println("Generated Haxe build command: " + command);
+        if (this.sprojJson.language == "haxe") {
+            var command = this.generateHaxeBuildCommand();
+            Sys.println("Generated Haxe build command: " + command);
 
-        var hxres = -1;
-        if (Sys.systemName() == "Windows") {
-            Sys.setCwd(this.projDirPath);
-            hxres = Sys.command("cd " + this.projDirPath + " && " + command);
-        }
-        else {
-            var shellscript = "#!/bin/sh\n";
-            shellscript += "cd \"" + this.projDirPath + "\"\n";
-            shellscript += command;
+            var hxres = -1;
+            if (Sys.systemName() == "Windows") {
+                Sys.setCwd(this.projDirPath);
+                hxres = Sys.command("cd " + this.projDirPath + " && " + command);
+            }
+            else {
+                var shellscript = "#!/bin/sh\n";
+                shellscript += "cd \"" + this.projDirPath + "\"\n";
+                shellscript += command;
 
-            var shpath = this.projDirPath + "/.studio/build-game-code.sh";
-            if (StringTools.endsWith(this.projDirPath, "/")) {
-                shpath = this.projDirPath + ".studio/build-game-code.sh";
+                var shpath = this.projDirPath + "/.studio/build-game-code.sh";
+                if (StringTools.endsWith(this.projDirPath, "/")) {
+                    shpath = this.projDirPath + ".studio/build-game-code.sh";
+                }
+
+                File.saveContent(shpath, shellscript);
+
+                chmodder(shpath);
+
+                hxres = Sys.command(shpath);
             }
 
-            File.saveContent(shpath, shellscript);
-
-            chmodder(shpath);
-
-            hxres = Sys.command(shpath);
+            if (hxres != 0) {
+                Sys.println("Haxe build command failed with exit code: " + hxres);
+                throw "Haxe build command failed with exit code: " + hxres;
+                return;
+            }
+            Sys.println("Haxe build command executed successfully.");
+            yield();
         }
 
-        if (hxres != 0) {
-            Sys.println("Haxe build command failed with exit code: " + hxres);
-            throw "Haxe build command failed with exit code: " + hxres;
-            return;
-        }
-        Sys.println("Haxe build command executed successfully.");
-        yield();
 
         var rootFolders: Array<VFolder> = [];
         var rootFiles: Array<VFile> = [];
@@ -546,59 +565,61 @@ class Gamepak {
         // Phase 5: Add main Lua file to zip
         // ---------------------------------
         var mainLuaPath = this.projDirPath + "/" + this.sprojJson.luabin;
-        trace(mainLuaPath, FileSystem.exists(mainLuaPath));
-        if (!FileSystem.exists(mainLuaPath)) {
-            Sys.println("Main Lua file does not exist: " + mainLuaPath);
-            throw "Main Lua file does not exist: " + mainLuaPath;
-            return;
-        }
-
-        var mainLuaContent = File.getBytes(mainLuaPath);
-        addToZipFile(this.sprojJson.luabin, mainLuaContent);
-        rootFiles.push({
-            name: this.sprojJson.luabin,
-            path: this.sprojJson.luabin
-        });
-        FileSystem.deleteFile(mainLuaPath);
-        Sys.println("Added File: main.lua");
-        yield();
-
-        // --------------------------------
-        // Phase 6: Add optional source map
-        // --------------------------------
-        if (this.sprojJson.sourcemap != false) {
-            var sourceMapName = this.sprojJson.luabin + ".map";
-            var sourceMapPath = this.projDirPath + "/" + sourceMapName;
-            if (FileSystem.exists(sourceMapPath)) {
-                var sourceMapContent = File.getBytes(sourceMapPath);
-                addToZipFile(sourceMapName, sourceMapContent);
-                FileSystem.deleteFile(sourceMapPath);
+        if (this.sprojJson.language == "haxe") {
+            trace(mainLuaPath, FileSystem.exists(mainLuaPath));
+            if (!FileSystem.exists(mainLuaPath)) {
+                Sys.println("Main Lua file does not exist: " + mainLuaPath);
+                throw "Main Lua file does not exist: " + mainLuaPath;
+                return;
             }
-            rootFiles.push({
-                name: sourceMapName,
-                path: sourceMapName
-            });
-            Sys.println("Added File: " + sourceMapName);
-        }
-        yield();
 
-        // --------------------------------
-        // Phase 7: Add API symbols if any
-        // --------------------------------
-        if (this.sprojJson.apisymbols != false) {
-            var typesXmlPath = this.projDirPath + "/types.xml";
-            if (FileSystem.exists(typesXmlPath)) {
-                var typesXmlContent = File.getBytes(typesXmlPath);
-                addToZipFile("types.xml", typesXmlContent);
-                FileSystem.deleteFile(typesXmlPath);
-            }
+            var mainLuaContent = File.getBytes(mainLuaPath);
+            addToZipFile(this.sprojJson.luabin, mainLuaContent);
             rootFiles.push({
-                name: "types.xml",
-                path: "types.xml"            
+                name: this.sprojJson.luabin,
+                path: this.sprojJson.luabin
             });
-            Sys.println("Added File: types.xml");
+            FileSystem.deleteFile(mainLuaPath);
+            Sys.println("Added File: main.lua");
+            yield();
+
+            // --------------------------------
+            // Phase 6: Add optional source map
+            // --------------------------------
+            if (this.sprojJson.sourcemap != false) {
+                var sourceMapName = this.sprojJson.luabin + ".map";
+                var sourceMapPath = this.projDirPath + "/" + sourceMapName;
+                if (FileSystem.exists(sourceMapPath)) {
+                    var sourceMapContent = File.getBytes(sourceMapPath);
+                    addToZipFile(sourceMapName, sourceMapContent);
+                    FileSystem.deleteFile(sourceMapPath);
+                }
+                rootFiles.push({
+                    name: sourceMapName,
+                    path: sourceMapName
+                });
+                Sys.println("Added File: " + sourceMapName);
+            }
+            yield();
+
+            // --------------------------------
+            // Phase 7: Add API symbols if any
+            // --------------------------------
+            if (this.sprojJson.apisymbols != false) {
+                var typesXmlPath = this.projDirPath + "/types.xml";
+                if (FileSystem.exists(typesXmlPath)) {
+                    var typesXmlContent = File.getBytes(typesXmlPath);
+                    addToZipFile("types.xml", typesXmlContent);
+                    FileSystem.deleteFile(typesXmlPath);
+                }
+                rootFiles.push({
+                    name: "types.xml",
+                    path: "types.xml"
+                });
+                Sys.println("Added File: types.xml");
+            }
+            yield();
         }
-        yield();
 
         // ----------------------------
         // Phase 8: Add assets to zip
@@ -651,6 +672,12 @@ class Gamepak {
         }
         yield();
 
+
+        var runtime = this.sprojJson.language;
+        if (runtime == "lua") {
+            runtime = "sunaba-lua";
+        }
+
         // ------------------------------
         // Phase 9: Add header.json entry
         // ------------------------------
@@ -659,7 +686,7 @@ class Gamepak {
             version: this.sprojJson.version,
             rootUrl: this.sprojJson.rootUrl,
             luabin: this.sprojJson.luabin,
-            runtime: "lua",
+            runtime: runtime,
             type: this.sprojJson.type
         };
         var headerJson = haxe.Json.stringify(header);
@@ -760,25 +787,29 @@ class Gamepak {
         // -------------------------------
         count++;
 
-        // -----------------------------
-        // Phase 4: Haxe build command
-        // -----------------------------
-        count++;
+        if (this.sprojJson.language == "haxe") {
+            // -----------------------------
+            // Phase 4: Haxe build command
+            // -----------------------------
+            count++;
 
-        // ---------------------------------
-        // Phase 5: Add main Lua file to zip
-        // ---------------------------------
-        count++;
+            // ---------------------------------
+            // Phase 5: Add main Lua file to zip
+            // ---------------------------------
+            count++;
 
-        // --------------------------------
-        // Phase 6: Add optional source map
-        // --------------------------------
-        count++;
+            // --------------------------------
+            // Phase 6: Add optional source map
+            // --------------------------------
+            count++;
 
-        // --------------------------------
-        // Phase 7: Add API symbols if any
-        // --------------------------------
-        count++;
+            // --------------------------------
+            // Phase 7: Add API symbols if any
+            // --------------------------------
+            count++;
+        }
+
+
 
         // ----------------------------
         // Phase 8: Add assets to zip
