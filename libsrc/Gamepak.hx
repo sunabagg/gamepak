@@ -14,10 +14,10 @@ import org.msgpack.MsgPack;
 #end
 class Gamepak {
 
-    public var snbprojPath: String;
+    public var imxprojPath: String;
     public var projDirPath: String = "";
 
-    public var sprojJson: ProjectFile;
+    public var improjJson: ProjectFile;
 
     public var zipOutputPath: String = "";
 
@@ -41,16 +41,16 @@ class Gamepak {
 
     public var chmodder: (String)->Void;
 
-    public function build(snbprojPath: String): Void {
-        Sys.println("Building project at: " + snbprojPath);
+    public function build(imxprojPath: String): Void {
+        Sys.println("Building project at: " + imxprojPath);
 
-        snbprojPath = FileSystem.absolutePath(snbprojPath);
+        imxprojPath = FileSystem.absolutePath(imxprojPath);
 
         // Here you would implement the logic to build the project
         // For now, we just print a message
-        this.snbprojPath = snbprojPath;
-        var snbProjPathArray = snbprojPath.split("/");
-        this.projDirPath = snbProjPathArray.slice(0, snbProjPathArray.length - 1).join("/");
+        this.imxprojPath = imxprojPath;
+        var imxProjPathArray = imxprojPath.split("/");
+        this.projDirPath = imxProjPathArray.slice(0, imxProjPathArray.length - 1).join("/");
         Sys.println("Project directory path: " + this.projDirPath);
         var binPath = this.projDirPath + "/bin";
         if (!FileSystem.exists(binPath)) {
@@ -62,55 +62,55 @@ class Gamepak {
 
         // Load the XML project file
         try {
-            var json = sys.io.File.getContent(snbprojPath);
-            this.sprojJson = haxe.Json.parse(json);
-            if (this.sprojJson.language == null || this.sprojJson.language == "")
-                this.sprojJson.language = "haxe";
+            var json = sys.io.File.getContent(imxprojPath);
+            this.improjJson = haxe.Json.parse(json);
+            if (this.improjJson.language == null || this.improjJson.language == "")
+                this.improjJson.language = "haxe";
             Sys.println("Successfully loaded project JSON.");
 
-            Sys.println("Project name: " + this.sprojJson.name);
-            Sys.println("Project version: " + this.sprojJson.version);
-            Sys.println("Project type: " + this.sprojJson.type);
-            Sys.println("Script directory: " + this.sprojJson.scriptdir);
-            Sys.println("Assets directory: " + this.sprojJson.assetsdir);
-            Sys.println("API symbols enabled: " + this.sprojJson.apisymbols);
-            Sys.println("Source map enabled: " + this.sprojJson.sourcemap);
-            Sys.println("Entrypoint: " + this.sprojJson.entrypoint);
-            Sys.println("Lua binary: " + this.sprojJson.luabin);
-            Sys.println("Libraries: " + this.sprojJson.libraries.join(", "));
-            Sys.println("Compiler flags: " + this.sprojJson.compilerFlags.join(", "));
+            Sys.println("Project name: " + this.improjJson.name);
+            Sys.println("Project version: " + this.improjJson.version);
+            Sys.println("Project type: " + this.improjJson.type);
+            Sys.println("Script directory: " + this.improjJson.scriptdir);
+            Sys.println("Assets directory: " + this.improjJson.assetsdir);
+            Sys.println("API symbols enabled: " + this.improjJson.apisymbols);
+            Sys.println("Source map enabled: " + this.improjJson.sourcemap);
+            Sys.println("Entrypoint: " + this.improjJson.entrypoint);
+            Sys.println("Lua binary: " + this.improjJson.luabin);
+            Sys.println("Libraries: " + this.improjJson.libraries.join(", "));
+            Sys.println("Compiler flags: " + this.improjJson.compilerFlags.join(", "));
 
-            if (sprojJson.type == "executable") {
+            if (improjJson.type == "executable") {
                 if (zipOutputPath == "") {
-                    zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
+                    zipOutputPath = this.projDirPath + "/bin/" + this.improjJson.name + ".imx";
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".slib")) {
-                    Sys.println("Warning: Output path ends with .slib, changing to .snb");
-                    zipOutputPath = StringTools.replace(zipOutputPath, ".slib", ".snb");
+                else if (StringTools.endsWith(zipOutputPath, ".imlib")) {
+                    Sys.println("Warning: Output path ends with .imlib, changing to .imx");
+                    zipOutputPath = StringTools.replace(zipOutputPath, ".imlib", ".imx");
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".snb")) {
+                else if (StringTools.endsWith(zipOutputPath, ".imx")) {
                     // Do nothing, already correct
                 }
                 else {
-                    zipOutputPath += ".snb";
+                    zipOutputPath += ".imx";
                 }
             }
-            else if (sprojJson.type == "library" || sprojJson.type == "plugin") {
+            else if (improjJson.type == "library" || improjJson.type == "plugin") {
                 if (zipOutputPath == "") {
-                    zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".slib";
+                    zipOutputPath = this.projDirPath + "/bin/" + this.improjJson.name + ".imlib";
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".snb")) {
-                    Sys.println("Warning: Output path ends with .snb, changing to .slib");
-                    zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".slib");
+                else if (StringTools.endsWith(zipOutputPath, ".imx")) {
+                    Sys.println("Warning: Output path ends with .imx, changing to .imlib");
+                    zipOutputPath = StringTools.replace(zipOutputPath, ".imx", ".imlib");
                 }
-                else if (StringTools.endsWith(zipOutputPath, ".slib")) {
+                else if (StringTools.endsWith(zipOutputPath, ".imlib")) {
                     // Do nothing, already correct
                 }
                 else {
-                    zipOutputPath += ".slib";
+                    zipOutputPath += ".imlib";
                 }
             } else {
-                Sys.println("Unknown project type: " + this.sprojJson.type);
+                Sys.println("Unknown project type: " + this.improjJson.type);
                 Sys.exit(1);
                 return;
             }
@@ -118,7 +118,7 @@ class Gamepak {
             var mainLuaPath: String = "";
             var mainLuaContent: Bytes = null;
 
-            if (this.sprojJson.language == "haxe") {
+            if (this.improjJson.language == "haxe") {
                 var command = this.generateHaxeBuildCommand();
                 Sys.println("Generated Haxe build command: " + command);
 
@@ -134,7 +134,7 @@ class Gamepak {
 
                 Sys.println("Haxe build command executed successfully.");
 
-                mainLuaPath = this.projDirPath + "/" + this.sprojJson.luabin;
+                mainLuaPath = this.projDirPath + "/" + this.improjJson.luabin;
                 if (!FileSystem.exists(mainLuaPath)) {
                     Sys.println("Main Lua file does not exist: " + mainLuaPath);
                     Sys.exit(1);
@@ -157,11 +157,11 @@ class Gamepak {
             // Collect all zip entries in a list
             var entries = new haxe.ds.List<haxe.zip.Entry>();
 
-            if (this.sprojJson.language == "haxe") {
-                //Sys.println("Adding main Lua file to zip: " + this.snbProjJson.luabin);
+            if (this.improjJson.language == "haxe") {
+                //Sys.println("Adding main Lua file to zip: " + this.imxProjJson.luabin);
                 // Add main Lua file to the zip
                 var entry:haxe.zip.Entry = {
-                    fileName: this.sprojJson.luabin,
+                    fileName: this.improjJson.luabin,
                     fileTime: Date.now(),
                     dataSize: mainLuaContent.length,
                     fileSize: mainLuaContent.length,
@@ -171,13 +171,13 @@ class Gamepak {
                 };
                 entries.add(entry);
                 rootFiles.push({
-                    name: this.sprojJson.luabin,
-                    path: this.sprojJson.luabin
+                    name: this.improjJson.luabin,
+                    path: this.improjJson.luabin
                 });
                 FileSystem.deleteFile(mainLuaPath);
 
-                if (this.sprojJson.sourcemap != false) {
-                    var sourceMapName = this.sprojJson.luabin + ".map";
+                if (this.improjJson.sourcemap != false) {
+                    var sourceMapName = this.improjJson.luabin + ".map";
                     var sourceMapPath = this.projDirPath + "/" + sourceMapName;
                     if (FileSystem.exists(sourceMapPath)) {
                         //Sys.println("Adding source map file: " + sourceMapName);
@@ -201,7 +201,7 @@ class Gamepak {
                         Sys.println("Source map file does not exist, skipping: " + sourceMapName);
                     }
                 }
-                if (this.sprojJson.apisymbols != false) {
+                if (this.improjJson.apisymbols != false) {
                     var typesXmlPath = this.projDirPath + "/types.xml";
                     if (FileSystem.exists(typesXmlPath)) {
                         //Sys.println("Adding types XML file: types.xml");
@@ -228,7 +228,7 @@ class Gamepak {
             }
 
 
-            var assetPath = this.projDirPath + "/" + this.sprojJson.assetsdir;
+            var assetPath = this.projDirPath + "/" + this.improjJson.assetsdir;
             if (FileSystem.exists(assetPath)) {
                 var assets = this.getAllFiles(assetPath);
 
@@ -289,18 +289,18 @@ class Gamepak {
 
             Sys.println("creating header for zip file");
 
-            var runtime = this.sprojJson.language;
+            var runtime = this.improjJson.language;
             if (runtime == "lua") {
-                runtime = "sunaba-lua";
+                runtime = "imagispace-lua";
             }
 
             var header : HeaderFile = {
-                name: this.sprojJson.name,
-                version: this.sprojJson.version,
-                rootUrl: this.sprojJson.rootUrl,
-                luabin: this.sprojJson.luabin,
+                name: this.improjJson.name,
+                version: this.improjJson.version,
+                rootUrl: this.improjJson.rootUrl,
+                luabin: this.improjJson.luabin,
                 runtime: runtime,
-                type: this.sprojJson.type
+                type: this.improjJson.type
             };
             rootFiles.push({
                 name: "header.json",
@@ -345,7 +345,7 @@ class Gamepak {
             if (this.markExecutable) {
                 // Mark the output file as executable
                 Sys.println("Marking output file as executable: " + zipOutputPath);
-                /*var shebang = "#!/usr/bin/env sunaba\n"; // or "#!/usr/bin/env sh\n"
+                /*var shebang = "#!/usr/bin/env imagispace\n"; // or "#!/usr/bin/env sh\n"
                 var zipBytes = File.getBytes(zipOutputPath);
                 var shebangBytes = Bytes.ofString(shebang);
         
@@ -359,11 +359,11 @@ class Gamepak {
                 out.write(outputBytes);
                 out.close();
 
-                if (sprojJson.type == "executable") {
-                    Sys.println("snb file created successfully at: " + zipOutputPath);
+                if (improjJson.type == "executable") {
+                    Sys.println("imx file created successfully at: " + zipOutputPath);
                 }
-                else if (sprojJson.type == "library") {
-                    Sys.println("slib file created successfully at: " + zipOutputPath);
+                else if (improjJson.type == "library") {
+                    Sys.println("imlib file created successfully at: " + zipOutputPath);
                 }*/
             }
 
@@ -422,7 +422,7 @@ class Gamepak {
     public var skipAssets: Bool = false;
 
 #if lua
-    public function buildCoroutine(snbprojPath: String): lua.Coroutine<()->Void> {
+    public function buildCoroutine(imxprojPath: String): lua.Coroutine<()->Void> {
         if (createZip == null) {
             throw "1";
         }
@@ -434,7 +434,7 @@ class Gamepak {
         }
     return Coroutine.create(() -> {
 #else
-    public function buildCoroutine(snbprojPath: String): Void {
+    public function buildCoroutine(imxprojPath: String): Void {
         if (createZip == null) {
             throw "1";
         }
@@ -450,14 +450,14 @@ class Gamepak {
         // Phase 1: Initial setup and paths
         // ---------------------------------
         cnt = 0;
-        Sys.println("Building project at: " + snbprojPath);
+        Sys.println("Building project at: " + imxprojPath);
 
-        if (StringTools.contains(snbprojPath, "\\")) {
-            snbprojPath = StringTools.replace(snbprojPath, "\\", "/");
+        if (StringTools.contains(imxprojPath, "\\")) {
+            imxprojPath = StringTools.replace(imxprojPath, "\\", "/");
         }
-        this.snbprojPath = snbprojPath;
-        var snbProjPathArray = snbprojPath.split("/");
-        this.projDirPath = snbProjPathArray.slice(0, snbProjPathArray.length - 1).join("/");
+        this.imxprojPath = imxprojPath;
+        var imxProjPathArray = imxprojPath.split("/");
+        this.projDirPath = imxProjPathArray.slice(0, imxProjPathArray.length - 1).join("/");
         Sys.println("Project directory path: " + this.projDirPath);
 
         var binPath = this.projDirPath + "/bin";
@@ -473,14 +473,14 @@ class Gamepak {
         // Phase 2: Load project JSON
         // ---------------------------
         try {
-            var json = sys.io.File.getContent(snbprojPath);
-            this.sprojJson = haxe.Json.parse(json);
-            if (this.sprojJson.language == null || this.sprojJson.language == "")
-                this.sprojJson.language = "haxe";
+            var json = sys.io.File.getContent(imxprojPath);
+            this.improjJson = haxe.Json.parse(json);
+            if (this.improjJson.language == null || this.improjJson.language == "")
+                this.improjJson.language = "haxe";
             Sys.println("Successfully loaded project JSON.");
-            Sys.println("Project name: " + this.sprojJson.name);
-            Sys.println("Project version: " + this.sprojJson.version);
-            Sys.println("Project type: " + this.sprojJson.type);
+            Sys.println("Project name: " + this.improjJson.name);
+            Sys.println("Project version: " + this.improjJson.version);
+            Sys.println("Project type: " + this.improjJson.type);
         } catch (e: Dynamic) {
             Sys.println("Error loading project JSON: " + e);
             throw "Error loading project JSON: " + e;
@@ -491,27 +491,27 @@ class Gamepak {
         // -------------------------------
         // Phase 3: Determine output path
         // -------------------------------
-        if (sprojJson.type == "executable") {
+        if (improjJson.type == "executable") {
             if (zipOutputPath == "") {
-                zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
-            } else if (StringTools.endsWith(zipOutputPath, ".slib")) {
-                Sys.println("Warning: Output path ends with .slib, changing to .snb");
-                zipOutputPath = StringTools.replace(zipOutputPath, ".slib", ".snb");
-            } else if (!StringTools.endsWith(zipOutputPath, ".snb")) {
-                zipOutputPath += ".snb";
+                zipOutputPath = this.projDirPath + "/bin/" + this.improjJson.name + ".imx";
+            } else if (StringTools.endsWith(zipOutputPath, ".imlib")) {
+                Sys.println("Warning: Output path ends with .imlib, changing to .imx");
+                zipOutputPath = StringTools.replace(zipOutputPath, ".imlib", ".imx");
+            } else if (!StringTools.endsWith(zipOutputPath, ".imx")) {
+                zipOutputPath += ".imx";
             }
-        } else if (sprojJson.type == "library" || sprojJson.type == "plugin") {
+        } else if (improjJson.type == "library" || improjJson.type == "plugin") {
             if (zipOutputPath == "") {
-                zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".slib";
-            } else if (StringTools.endsWith(zipOutputPath, ".snb")) {
-                Sys.println("Warning: Output path ends with .snb, changing to .slib");
-                zipOutputPath = StringTools.replace(zipOutputPath, ".snb", ".slib");
-            } else if (!StringTools.endsWith(zipOutputPath, ".slib")) {
-                zipOutputPath += ".slib";
+                zipOutputPath = this.projDirPath + "/bin/" + this.improjJson.name + ".imlib";
+            } else if (StringTools.endsWith(zipOutputPath, ".imx")) {
+                Sys.println("Warning: Output path ends with .imx, changing to .imlib");
+                zipOutputPath = StringTools.replace(zipOutputPath, ".imx", ".imlib");
+            } else if (!StringTools.endsWith(zipOutputPath, ".imlib")) {
+                zipOutputPath += ".imlib";
             }
         } else {
-            Sys.println("Unknown project type: " + this.sprojJson.type);
-            throw "Unknown project type: " + this.sprojJson.type;
+            Sys.println("Unknown project type: " + this.improjJson.type);
+            throw "Unknown project type: " + this.improjJson.type;
             return;
         }
         yield();
@@ -521,7 +521,7 @@ class Gamepak {
         // -----------------------------
         // Phase 4: Haxe build command
         // -----------------------------
-        if (this.sprojJson.language == "haxe") {
+        if (this.improjJson.language == "haxe") {
             var command = this.generateHaxeBuildCommand();
             Sys.println("Generated Haxe build command: " + command);
 
@@ -564,8 +564,8 @@ class Gamepak {
         // ---------------------------------
         // Phase 5: Add main Lua file to zip
         // ---------------------------------
-        var mainLuaPath = this.projDirPath + "/" + this.sprojJson.luabin;
-        if (this.sprojJson.language == "haxe") {
+        var mainLuaPath = this.projDirPath + "/" + this.improjJson.luabin;
+        if (this.improjJson.language == "haxe") {
             trace(mainLuaPath, FileSystem.exists(mainLuaPath));
             if (!FileSystem.exists(mainLuaPath)) {
                 Sys.println("Main Lua file does not exist: " + mainLuaPath);
@@ -574,10 +574,10 @@ class Gamepak {
             }
 
             var mainLuaContent = File.getBytes(mainLuaPath);
-            addToZipFile(this.sprojJson.luabin, mainLuaContent);
+            addToZipFile(this.improjJson.luabin, mainLuaContent);
             rootFiles.push({
-                name: this.sprojJson.luabin,
-                path: this.sprojJson.luabin
+                name: this.improjJson.luabin,
+                path: this.improjJson.luabin
             });
             FileSystem.deleteFile(mainLuaPath);
             Sys.println("Added File: main.lua");
@@ -586,8 +586,8 @@ class Gamepak {
             // --------------------------------
             // Phase 6: Add optional source map
             // --------------------------------
-            if (this.sprojJson.sourcemap != false) {
-                var sourceMapName = this.sprojJson.luabin + ".map";
+            if (this.improjJson.sourcemap != false) {
+                var sourceMapName = this.improjJson.luabin + ".map";
                 var sourceMapPath = this.projDirPath + "/" + sourceMapName;
                 if (FileSystem.exists(sourceMapPath)) {
                     var sourceMapContent = File.getBytes(sourceMapPath);
@@ -605,7 +605,7 @@ class Gamepak {
             // --------------------------------
             // Phase 7: Add API symbols if any
             // --------------------------------
-            if (this.sprojJson.apisymbols != false) {
+            if (this.improjJson.apisymbols != false) {
                 var typesXmlPath = this.projDirPath + "/types.xml";
                 if (FileSystem.exists(typesXmlPath)) {
                     var typesXmlContent = File.getBytes(typesXmlPath);
@@ -624,7 +624,7 @@ class Gamepak {
         // ----------------------------
         // Phase 8: Add assets to zip
         // ----------------------------
-        var assetPath = this.projDirPath + "/" + this.sprojJson.assetsdir;
+        var assetPath = this.projDirPath + "/" + this.improjJson.assetsdir;
         if (FileSystem.exists(assetPath) && skipAssets == false) {
             var assets = this.getAllFilesCR(assetPath);
             yield();
@@ -673,21 +673,21 @@ class Gamepak {
         yield();
 
 
-        var runtime = this.sprojJson.language;
+        var runtime = this.improjJson.language;
         if (runtime == "lua") {
-            runtime = "sunaba-lua";
+            runtime = "imagispace-lua";
         }
 
         // ------------------------------
         // Phase 9: Add header.json entry
         // ------------------------------
         var header : HeaderFile = {
-            name: this.sprojJson.name,
-            version: this.sprojJson.version,
-            rootUrl: this.sprojJson.rootUrl,
-            luabin: this.sprojJson.luabin,
+            name: this.improjJson.name,
+            version: this.improjJson.version,
+            rootUrl: this.improjJson.rootUrl,
+            luabin: this.improjJson.luabin,
             runtime: runtime,
-            type: this.sprojJson.type
+            type: this.improjJson.type
         };
         var headerJson = haxe.Json.stringify(header);
         var headerContent = haxe.io.Bytes.ofString(headerJson);
@@ -718,7 +718,7 @@ class Gamepak {
         // Phase 11: Mark as executable
         // ---------------------------------
         if (this.markExecutable) {
-            /*var shebang = "#!/usr/bin/env sunaba\n";
+            /*var shebang = "#!/usr/bin/env imagispace\n";
             var zipBytes = File.getBytes(zipOutputPath);
             var shebangBytes = Bytes.ofString(shebang);
             var outputBytes = Bytes.alloc(shebangBytes.length + zipBytes.length);
@@ -774,7 +774,7 @@ class Gamepak {
         return assets;
     }
 
-    public function buildCoroutineCount(snbprojPath: String): Int {
+    public function buildCoroutineCount(imxprojPath: String): Int {
         // ---------------------------------
         // Phase 1: Initial setup and paths
         // ---------------------------------
@@ -787,7 +787,7 @@ class Gamepak {
         // -------------------------------
         count++;
 
-        if (this.sprojJson.language == "haxe") {
+        if (this.improjJson.language == "haxe") {
             // -----------------------------
             // Phase 4: Haxe build command
             // -----------------------------
@@ -814,7 +814,7 @@ class Gamepak {
         // ----------------------------
         // Phase 8: Add assets to zip
         // ----------------------------
-        var assetPath = this.projDirPath + "/" + this.sprojJson.assetsdir;
+        var assetPath = this.projDirPath + "/" + this.improjJson.assetsdir;
         if (FileSystem.exists(assetPath) && skipAssets == false) {
             var assets = this.getAllFiles(assetPath);
             count += this.getAllFilesCount(assetPath);
@@ -853,7 +853,7 @@ class Gamepak {
         // Phase 11: Mark as executable
         // ---------------------------------
         if (this.markExecutable) {
-            /*var shebang = "#!/usr/bin/env sunaba\n";
+            /*var shebang = "#!/usr/bin/env imagispace\n";
             var zipBytes = File.getBytes(zipOutputPath);
             var shebangBytes = Bytes.ofString(shebang);
             var outputBytes = Bytes.alloc(shebangBytes.length + zipBytes.length);
@@ -910,43 +910,43 @@ class Gamepak {
         var command = "" + haxePath + " \"" + hxmlPath + "\"";
 
         return command;
-        /*var command = this.haxePath + " --class-path " + this.projDirPath + "/" + this.snbProjJson.scriptdir + " -main " + this.snbProjJson.entrypoint + " --library sunaba";
-        if (this.snbProjJson.apisymbols != false) {
+        /*var command = this.haxePath + " --class-path " + this.projDirPath + "/" + this.imxProjJson.scriptdir + " -main " + this.imxProjJson.entrypoint + " --library imagispace";
+        if (this.imxProjJson.apisymbols != false) {
             command += " --xml " + this.projDirPath + "/types.xml";
         }
-        if (this.snbProjJson.sourcemap != false) {
+        if (this.imxProjJson.sourcemap != false) {
             command += " -D source-map";
         }
-        command += " -lua " + this.projDirPath + "/" + this.snbProjJson.luabin += " -D lua-ver 5.4";
+        command += " -lua " + this.projDirPath + "/" + this.imxProjJson.luabin += " -D lua-ver 5.4";
 
         var librariesStr = "";
-        for (lib in this.snbProjJson.libraries) {
+        for (lib in this.imxProjJson.libraries) {
             librariesStr += " --library " + lib;
         }
-        command += " " + this.snbProjJson.compilerFlags.join(" ");
+        command += " " + this.imxProjJson.compilerFlags.join(" ");
         return command;*/
     }
 
     var useExternApi = false;
 
     private function generateHaxeBuildHxml(): String {
-        var command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library libsunaba";
-        if (sprojJson.type == "plugin") {
-            command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.pluginEntrypoint + "\n--library libsunaba\n--library sunaba-studio\n--library gamepak";
+        var command = "--class-path \"" + this.improjJson.scriptdir + "\"\n-main " + this.improjJson.entrypoint + "\n--library imagispace";
+        if (improjJson.type == "plugin") {
+            command = "--class-path \"" + this.improjJson.scriptdir + "\"\n-main " + this.improjJson.pluginEntrypoint + "\n--library imagispace\n--library imagispace-studio\n--library gamepak";
         }
-        if (this.sprojJson.apisymbols != false) {
+        if (this.improjJson.apisymbols != false) {
             command += "\n--xml types.xml";
         }
-        if (this.sprojJson.sourcemap != false) {
+        if (this.improjJson.sourcemap != false) {
             command += "\n-D source-map";
         }
-        command += "\n-lua \"" + this.sprojJson.luabin += "\"\n-D lua-vanilla";
+        command += "\n-lua \"" + this.improjJson.luabin += "\"\n-D lua-vanilla";
 
         var librariesStr = "";
-        for (lib in this.sprojJson.libraries) {
+        for (lib in this.improjJson.libraries) {
             librariesStr += "\n--library " + lib;
         }
-        command += "\n" + this.sprojJson.compilerFlags.join("\n");
+        command += "\n" + this.improjJson.compilerFlags.join("\n");
         return command;
     }
 
