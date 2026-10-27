@@ -9,7 +9,7 @@ class Main {
 
         var args = Sys.args();
         if (args.length < 1 || args[0] == "-h" || args[0] == "--help") {
-            Sys.println("Usage: gamepak <project.improj>");
+            Sys.println("Usage: gamepak <project.sproj>");
             return;
         }
 
@@ -21,21 +21,21 @@ class Main {
             gamepak.zipOutputPath = FileSystem.absolutePath(arg2);
         }
         
-        var imxprojpath = "";
+        var snbprojpath = "";
         for (arg in args) {
-            if (StringTools.endsWith(arg, ".sproj") || StringTools.endsWith(arg, ".improj")) {
-                imxprojpath = arg;
+            if (StringTools.endsWith(arg, ".sproj")) {
+                snbprojpath = arg;
                 break;
             }
         }
 
-        if (imxprojpath == "") {
-            Sys.println("Usage: gamepak <project.improj>");
+        if (snbprojpath == "") {
+            Sys.println("Usage: gamepak <project.sproj>");
             return;
         }
 
-        if (StringTools.contains(imxprojpath, "./")) {
-            imxprojpath = StringTools.replace(imxprojpath, "./", currentDirectory);
+        if (StringTools.contains(snbprojpath, "./")) {
+            snbprojpath = StringTools.replace(snbprojpath, "./", currentDirectory);
         }
 
         for (arg in args) {
@@ -47,6 +47,6 @@ class Main {
             }
         }
 
-        gamepak.build(imxprojpath);
+        gamepak.build(snbprojpath);
     }
 }
