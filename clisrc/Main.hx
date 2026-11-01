@@ -5,7 +5,7 @@ import sys.FileSystem;
 class Main {
     public static function main() {
         var currentDirectory = Sys.getCwd();
-        trace(currentDirectory);
+        //trace(currentDirectory);
 
         var args = Sys.args();
         if (args.length < 1 || args[0] == "-h" || args[0] == "--help") {
