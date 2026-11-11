@@ -80,7 +80,7 @@ class Gamepak {
             Sys.println("Libraries: " + this.sprojJson.libraries.join(", "));
             Sys.println("Compiler flags: " + this.sprojJson.compilerFlags.join(", "));
 
-            if (sprojJson.type == "executable") {
+            if (isAppType(sprojJson.type)) {
                 if (zipOutputPath == "") {
                     zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
                 }
@@ -491,7 +491,7 @@ class Gamepak {
         // -------------------------------
         // Phase 3: Determine output path
         // -------------------------------
-        if (sprojJson.type == "executable") {
+        if (isAppType(sprojJson.type)) {
             if (zipOutputPath == "") {
                 zipOutputPath = this.projDirPath + "/bin/" + this.sprojJson.name + ".snb";
             } else if (StringTools.endsWith(zipOutputPath, ".slib")) {
@@ -928,6 +928,13 @@ class Gamepak {
     }
 
     var useExternApi = false;
+
+    // Project types that run as an app and are packed as .snb. A minigame is an app whose
+    // entrypoint extends sunaba.Minigame; the type is carried in header.json so the player
+    // can tell the two apart.
+    public static function isAppType(type: String): Bool {
+        return type == "executable" || type == "minigame";
+    }
 
     private function generateHaxeBuildHxml(): String {
         var command = "--class-path \"" + this.sprojJson.scriptdir + "\"\n-main " + this.sprojJson.entrypoint + "\n--library libsunaba";

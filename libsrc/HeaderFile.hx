@@ -6,5 +6,5 @@ typedef HeaderFile = {
     var rootUrl: String;
     var luabin: String;
     var runtime: String;
-    var type: String; // "executable" or "library"
+    var type: String; // "executable", "minigame", "library" or "plugin"
 }
